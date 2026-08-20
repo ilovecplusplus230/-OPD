@@ -170,3 +170,62 @@ Additional references used by the semantic checks:
 - [Ren et al., 2020](https://arxiv.org/abs/2009.10297) for syntax and data-flow overlap.
 
 Implementation note: some metrics are lightweight pure-Python approximations of the standard definitions so the project stays dependency-free.
+
+## MBPP OPD Training
+
+The root `OPD-main` integration includes a dedicated Qwen3 teacher/student training path. It converts the local
+Hugging Face MBPP parquet files to verl format, keeps Qwen3 thinking mode enabled, evaluates generated Python
+with the supplied MBPP assertions, and uses OPD-main's teacher top-k token rewards on the student's own rollout.
+
+Use a dedicated CUDA training environment; the `llm_reviewer` environment used for ModelScope downloads is not
+a verl training environment. On a host with sufficient GPU and system memory, install the repository's pinned
+vLLM/Transformers stack as follows:
+
+```bash
+conda create -n verl python=3.12 -y
+conda activate verl
+cd OPD-main/verl
+USE_MEGATRON=0 USE_SGLANG=0 bash scripts/install_vllm_sglang_mcore.sh
+cd ../..
+```
+
+Prepare the full MBPP splits:
+
+```bash
+OPD_PYTHON=/path/to/verl/python bash OPD-main/train_mbpp_opd.sh prepare
+```
+
+Compose the exact Hydra configuration without loading either model:
+
+```bash
+OPD_PYTHON=/path/to/verl/python bash OPD-main/train_mbpp_opd.sh config
+```
+
+Run all environment, model, tokenizer, dataset, batch, GPU, and RAM checks:
+
+```bash
+OPD_PYTHON=/path/to/verl/python bash OPD-main/train_mbpp_opd.sh preflight
+```
+
+Start training:
+
+```bash
+OPD_PYTHON=/path/to/verl/python bash OPD-main/train_mbpp_opd.sh train
+```
+
+The defaults are:
+
+- student: `student_model` (Qwen3-1.7B)
+- teacher: `teacher_model` (Qwen3-4B)
+- `trainer.total_training_steps=200`
+- global batch size `32`
+- per-device actor micro-batch size `8`
+- gradient accumulation `4` on one data-parallel GPU
+- one student rollout per MBPP prompt
+- union top-k (`k=16`) with teacher-probability weighting
+- teacher inference under `torch.no_grad()` with no teacher optimizer
+
+These models require substantially more memory than an 8GB GPU plus 8GB system RAM for full-parameter OPD.
+The preflight check therefore stops on undersized hosts. `ALLOW_LOW_MEMORY=1` only bypasses that guard; it does
+not make an otherwise impossible allocation fit. A 24GB GPU and 32GB system RAM are the practical target for
+this configuration, with larger memory preferred.
