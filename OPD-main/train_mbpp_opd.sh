@@ -39,6 +39,7 @@ ALLOW_LOW_MEMORY=${ALLOW_LOW_MEMORY:-0}
 RAY_CPUS=${RAY_CPUS:-8}
 DATALOADER_NUM_WORKERS=${DATALOADER_NUM_WORKERS:-0}
 ENABLE_THINKING=${ENABLE_THINKING:-true}
+PATCH_VLLM_NUMPY_INDEX=${PATCH_VLLM_NUMPY_INDEX:-1}
 
 case "${ENABLE_THINKING,,}" in
     1|true|yes|on)
@@ -93,6 +94,19 @@ fi
 if [[ ! -f "${TRAIN_DATA}" || ! -f "${VAL_DATA}" ]]; then
     prepare_data
 fi
+
+case "${PATCH_VLLM_NUMPY_INDEX,,}" in
+    1|true|yes|on)
+        "${OPD_PYTHON}" "${SCRIPT_DIR}/patch_vllm_numpy_index.py"
+        ;;
+    0|false|no|off)
+        ;;
+    *)
+        printf 'PATCH_VLLM_NUMPY_INDEX must be true/false (received: %s)\n' \
+            "${PATCH_VLLM_NUMPY_INDEX}" >&2
+        exit 2
+        ;;
+esac
 
 TRAIN_OVERRIDES=(
     "algorithm.adv_estimator=token_reward_direct"

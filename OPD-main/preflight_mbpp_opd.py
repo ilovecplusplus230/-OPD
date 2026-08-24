@@ -194,6 +194,17 @@ def main() -> None:
         try:
             from packaging.version import Version
 
+            numpy_version = Version(version("numpy"))
+            if numpy_version >= Version("2.0.0"):
+                fail(
+                    f"Incompatible numpy={numpy_version}; this verl checkout requires numpy<2.0.0",
+                    errors,
+                )
+        except (PackageNotFoundError, ImportError, ValueError) as exc:
+            fail(f"Cannot validate the NumPy version: {exc}", errors)
+        try:
+            from packaging.version import Version
+
             transformers_version = Version(version("transformers"))
             if not (Version("4.51.0") <= transformers_version < Version("5.0.0")):
                 fail(
