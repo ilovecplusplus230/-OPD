@@ -38,6 +38,20 @@ SAVE_FREQ=${SAVE_FREQ:-20}
 ALLOW_LOW_MEMORY=${ALLOW_LOW_MEMORY:-0}
 RAY_CPUS=${RAY_CPUS:-8}
 DATALOADER_NUM_WORKERS=${DATALOADER_NUM_WORKERS:-0}
+ENABLE_THINKING=${ENABLE_THINKING:-true}
+
+case "${ENABLE_THINKING,,}" in
+    1|true|yes|on)
+        ENABLE_THINKING_BOOL=True
+        ;;
+    0|false|no|off)
+        ENABLE_THINKING_BOOL=False
+        ;;
+    *)
+        printf 'ENABLE_THINKING must be true/false (received: %s)\n' "${ENABLE_THINKING}" >&2
+        exit 2
+        ;;
+esac
 
 PROJECT_NAME=${PROJECT_NAME:-mbpp_qwen3_opd}
 EXPERIMENT_NAME=${EXPERIMENT_NAME:-qwen3_1p7b_from_qwen3_4b_steps${TOTAL_STEPS}_bs${GLOBAL_BATCH_SIZE}}
@@ -93,7 +107,7 @@ TRAIN_OVERRIDES=(
     "data.truncation=error"
     "data.shuffle=True"
     "data.return_raw_chat=True"
-    "+data.apply_chat_template_kwargs.enable_thinking=True"
+    "+data.apply_chat_template_kwargs.enable_thinking=${ENABLE_THINKING_BOOL}"
     "actor_rollout_ref.model.path=${STUDENT_MODEL}"
     "actor_rollout_ref.model.enable_gradient_checkpointing=True"
     "actor_rollout_ref.model.enable_activation_offload=True"

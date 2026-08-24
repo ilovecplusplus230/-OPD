@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-from importlib.metadata import PackageNotFoundError, version
 import json
 import subprocess
 import sys
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-
 
 RUNTIME_MODULES = (
     "torch",
@@ -21,6 +20,7 @@ RUNTIME_MODULES = (
     "verl",
     "flash_attn",
 )
+EXPECTED_MBPP_PROMPT_SCHEMA = "mbpp_required_interfaces_v1"
 
 
 def fail(message: str, errors: list[str]) -> None:
@@ -77,7 +77,26 @@ def parquet_rows(path: Path, errors: list[str]) -> int:
         missing = required - schema_names
         if missing:
             fail(f"{path} is missing verl columns: {sorted(missing)}", errors)
-        return pq.ParquetFile(path).metadata.num_rows
+            return pq.ParquetFile(path).metadata.num_rows
+        table = pq.read_table(path, columns=["prompt", "extra_info"])
+        for row_index, row in enumerate(table.to_pylist()):
+            extra_info = row.get("extra_info") if isinstance(row.get("extra_info"), dict) else {}
+            schema = extra_info.get("prompt_schema")
+            if schema != EXPECTED_MBPP_PROMPT_SCHEMA:
+                fail(
+                    f"{path} row {row_index} has prompt_schema={schema!r}; expected "
+                    f"{EXPECTED_MBPP_PROMPT_SCHEMA!r}. Re-run train_mbpp_opd.sh prepare.",
+                    errors,
+                )
+                break
+            entrypoints = extra_info.get("required_entrypoints") or []
+            interfaces = extra_info.get("required_interfaces") or []
+            prompt = row.get("prompt") or []
+            prompt_text = str(prompt[0].get("content", "")) if prompt and isinstance(prompt[0], dict) else ""
+            if not entrypoints or not interfaces or not all(str(interface) in prompt_text for interface in interfaces):
+                fail(f"{path} row {row_index} has incomplete required-interface prompt metadata", errors)
+                break
+        return table.num_rows
     except Exception as exc:
         fail(f"Cannot read parquet {path}: {exc}", errors)
         return 0

@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-
 DEFAULT_SPLITS = ("train", "validation", "test")
+PROMPT_SCHEMA = "mbpp_required_interfaces_v1"
 
 
 def _as_strings(value: Any) -> list[str]:
@@ -29,13 +31,91 @@ def _read_split(dataset_dir: Path, split: str) -> list[dict[str, Any]]:
     return table.to_pylist()
 
 
-def _prompt_text(row: dict[str, Any]) -> str:
+def _function_interface(node: ast.FunctionDef | ast.AsyncFunctionDef, *, indent: str = "") -> str:
+    prefix = "async def" if isinstance(node, ast.AsyncFunctionDef) else "def"
+    returns = f" -> {ast.unparse(node.returns)}" if node.returns is not None else ""
+    return f"{indent}{prefix} {node.name}({ast.unparse(node.args)}){returns}: ..."
+
+
+def _class_interface(node: ast.ClassDef) -> str:
+    bases = [ast.unparse(base) for base in node.bases]
+    bases.extend(f"{keyword.arg}={ast.unparse(keyword.value)}" for keyword in node.keywords if keyword.arg)
+    header = f"class {node.name}({', '.join(bases)}):" if bases else f"class {node.name}:"
+    methods = [
+        child
+        for child in node.body
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and not child.name.startswith("_")
+    ]
+    initializer = next(
+        (
+            child
+            for child in node.body
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and child.name == "__init__"
+        ),
+        None,
+    )
+    if initializer is not None:
+        methods.insert(0, initializer)
+    if not methods:
+        return f"{header}\n    ..."
+    return "\n".join([header, *[_function_interface(method, indent="    ") for method in methods]])
+
+
+def required_interface_spec(
+    canonical_code: str,
+    tests: Iterable[str],
+    setup_code: str = "",
+) -> tuple[list[str], list[str]]:
+    """Return test-visible top-level entrypoint names and implementation-free interfaces."""
+    try:
+        canonical_tree = ast.parse(canonical_code)
+    except SyntaxError as exc:
+        raise ValueError(f"Canonical MBPP code is not valid Python: {exc}") from exc
+
+    top_level_nodes = [
+        node
+        for node in canonical_tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    ]
+    top_level_by_name = {node.name: node for node in top_level_nodes}
+    called_names: set[str] = set()
+    for snippet in [*tests, setup_code]:
+        if not str(snippet).strip():
+            continue
+        try:
+            snippet_tree = ast.parse(str(snippet))
+        except SyntaxError as exc:
+            raise ValueError(f"MBPP test/setup snippet is not valid Python: {exc}") from exc
+        for node in ast.walk(snippet_tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                called_names.add(node.func.id)
+
+    required_nodes = [node for node in top_level_nodes if node.name in called_names]
+    if not required_nodes:
+        available = sorted(top_level_by_name)
+        raise ValueError(
+            "Could not match any test/setup call to a canonical top-level definition; "
+            f"available definitions={available}, called names={sorted(called_names)}"
+        )
+
+    entrypoints = [node.name for node in required_nodes]
+    interfaces = [
+        _class_interface(node) if isinstance(node, ast.ClassDef) else _function_interface(node)
+        for node in required_nodes
+    ]
+    return entrypoints, interfaces
+
+
+def _prompt_text(row: dict[str, Any], required_interfaces: list[str]) -> str:
     task = str(row.get("text") or row.get("prompt") or "").strip()
+    interface_block = "\n".join(required_interfaces)
     return (
         "Solve the following MBPP Python programming task. Reason step by step before writing the solution, "
-        "then return the complete implementation in one fenced ```python``` block. Preserve the requested "
-        "function signature and do not include placeholder code.\n\n"
-        f"Task:\n{task}"
+        "then return the complete implementation in one fenced ```python``` block. Implement every required "
+        "interface using the exact names and parameters shown below, and do not include placeholder code.\n\n"
+        f"Task:\n{task}\n\n"
+        "Required interface(s):\n"
+        f"```python\n{interface_block}\n```"
     )
 
 
@@ -58,6 +138,10 @@ def convert_row(
     canonical_code = str(row.get("code") or "").strip()
     task_id = str(row.get("task_id") if row.get("task_id") is not None else row_index)
     setup_code = _setup_code(row)
+    try:
+        required_entrypoints, required_interfaces = required_interface_spec(canonical_code, all_tests, setup_code)
+    except ValueError as exc:
+        raise ValueError(f"Failed to derive required interface for MBPP task_id={task_id}: {exc}") from exc
 
     ground_truth = json.dumps(
         {
@@ -65,13 +149,16 @@ def convert_row(
             "canonical_code": canonical_code,
             "setup_code": setup_code,
             "tests": all_tests,
+            "required_entrypoints": required_entrypoints,
+            "required_interfaces": required_interfaces,
+            "prompt_schema": PROMPT_SCHEMA,
         },
         ensure_ascii=False,
     )
 
     return {
         "data_source": "mbpp",
-        "prompt": [{"role": "user", "content": _prompt_text(row)}],
+        "prompt": [{"role": "user", "content": _prompt_text(row, required_interfaces)}],
         "ability": "code",
         # OPD uses a fresh student rollout. This is retained only for auditing/evaluation.
         "response": canonical_code,
@@ -88,6 +175,9 @@ def convert_row(
             "setup_code": setup_code,
             "tests": all_tests,
             "canonical_code": canonical_code,
+            "required_entrypoints": required_entrypoints,
+            "required_interfaces": required_interfaces,
+            "prompt_schema": PROMPT_SCHEMA,
         },
     }
 
