@@ -275,6 +275,74 @@ same arguments, writes failed completions to `failures.jsonl`, and continuously 
 Deterministic one-sample evaluation reports execution accuracy as `pass@1`. For sampled pass@k evaluation, set
 `--samples-per-task K --temperature 1.0`; pass@1 through pass@K use the standard unbiased estimator.
 
+### Iterative execution-feedback repair
+
+Standard `pass@k` draws `k` candidates independently from the same problem prompt. It does not let a later candidate
+observe an earlier failure. The optional execution-feedback strategy instead evaluates one candidate, retains its code
+and failure signal as short-lived task memory, and asks the same model for a corrected replacement only when that
+candidate fails:
+
+```text
+Problem -> Attempt 1 -> Restricted execution
+                     -> failure category + previous draft
+                     -> Attempt 2 -> Restricted execution
+                                  -> failure category + previous draft
+                                  -> Attempt 3
+```
+
+Run a three-attempt, hidden-test-safe smoke evaluation as follows:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+python -m code_rewrite_feedback_expander.evaluate_mbpp_local \
+  --model-path /path/to/merged_hf_model \
+  --dataset-path OPD-main/datasets/mbpp_opd/test.parquet \
+  --output-dir /path/to/mbpp_iterative_feedback_smoke \
+  --max-samples 10 \
+  --samples-per-task 3 \
+  --generation-strategy execution_feedback \
+  --execution-feedback summary \
+  --max-prompt-tokens 4096 \
+  --batch-size 1 \
+  --max-new-tokens 1024 \
+  --temperature 1.0 \
+  --top-p 1.0 \
+  --disable-thinking \
+  --device cuda:0 \
+  --dtype bfloat16 \
+  --attn-implementation sdpa \
+  --seed 42
+```
+
+`summary` feedback exposes syntax, safety, timeout, missing-code, required-interface, and generic held-out-test failure
+categories, but deliberately withholds hidden assertion source and expected values. `--execution-feedback full` also
+injects the raw executor output; because that output can reveal held-out assertions, the run is labelled
+`oracle-assisted` and must not be compared directly with a standard benchmark result.
+
+Conditional repair attempts are not independent samples, so the evaluator does not claim that their cumulative result
+is the standard unbiased `pass@3`. It reports `pass@1` for the first attempt and
+`iterative_solve_rate@1` through `iterative_solve_rate@3`, with `iterative_pass@k` retained only as an explicitly
+labelled conditional-repair alias. It additionally reports `repair_gain@3`, repaired-task count, repair success after
+an initial failure, attempts-to-solve, and total inference cost. Generation stops for a task immediately after its first
+passing attempt. Every prediction stores `attempt_id`, `previous_attempt_id`, `feedback_used`, and the feedback mode so
+the trajectory is auditable and resumable.
+
+This strategy is test-time in-context repair: it does not update model parameters. Existing OPD checkpoints are valid
+for measuring emergent repair ability and should be retained as controls. Training a model to internalize repair
+behavior requires a separate trajectory-training experiment containing `(problem, failed code, execution feedback,
+corrected code)` examples, as in CYCLE or reinforcement learning from execution feedback; it must not overwrite the
+single-turn OPD checkpoints.
+
+References used for iterative execution-feedback repair:
+
+- [Shinn et al., 2023, Reflexion (NeurIPS)](https://proceedings.neurips.cc/paper_files/paper/2023/hash/1b44b878bb782e6954cd888628510e90-Abstract-Conference.html) for retaining verbal feedback as episodic context across attempts.
+- [Madaan et al., 2023, Self-Refine (NeurIPS)](https://proceedings.neurips.cc/paper_files/paper/2023/hash/91edff07232fb1b55a505a9e9f6c0ff3-Abstract-Conference.html) for the iterative feedback-refinement-stopping loop without parameter updates.
+- [Chen et al., 2024, Teaching Large Language Models to Self-Debug (ICLR)](https://openreview.net/pdf?id=KuPixIqPiq) for reusing failed predictions and execution results in MBPP code repair.
+- [Le et al., 2022, CodeRL (NeurIPS)](https://proceedings.neurips.cc/paper_files/paper/2022/hash/8636419dea1aa9fbd25fc4248e702da4-Abstract-Conference.html) for unit-test/critic feedback and feedback-aware regeneration.
+- [Ding et al., 2024, CYCLE (PACMPL/OOPSLA)](https://doi.org/10.1145/3649825) for training code models on developing logs of faulty generations, execution feedback, and iterative correction.
+- [Gehring et al., 2024, RLEF](https://arxiv.org/abs/2410.02089) for reinforcement learning that teaches code models to condition future generations on execution feedback; this is cited as a preprint rather than a journal publication.
+- [Dou et al., 2024, Re-ReST](https://arxiv.org/abs/2406.01495) for reflection-reinforced self-training from low-quality attempts and environmental feedback; this is cited as a preprint.
+
 The summary also reports task/completion counts, sample pass rate, solved-at-least-once rate, code extraction and
 syntax validity and required-interface match rates, max-token clipping, error counts/rates, average and median token
 counts and latencies, and generation throughput. Each JSONL prediction retains the full response, extracted code,
