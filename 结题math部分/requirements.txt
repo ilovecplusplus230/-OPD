@@ -1,0 +1,6 @@
+openai>=1.30.0
+sympy>=1.12
+matplotlib>=3.8
+numpy>=1.26
+pytest>=8.0
+

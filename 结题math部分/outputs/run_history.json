@@ -1,0 +1,18 @@
+{
+  "model": "gpt-5.6-terra",
+  "provider": "https://api.gpt.ge/v1",
+  "formal_experiment": {
+    "completed_samples": 90,
+    "samples_per_dataset": 30,
+    "datasets": [
+      "GSM8K",
+      "MATH-500",
+      "NuminaMath-CoT"
+    ],
+    "api_responses_in_saved_records": 250,
+    "prompt_tokens_in_saved_records": 369579,
+    "completion_tokens_in_saved_records": 81307,
+    "total_tokens_in_saved_records": 450886
+  },
+  "execution_note": "实验采用断点续跑，并行 worker 只处理 NuminaMath-CoT。所有正式统计均由 90 条完整轨迹重算。早期连接失败前的 2 次回复和停止主进程时可能存在的在途请求没有形成完整样本，因此不计入正式 Token 统计。"
+}

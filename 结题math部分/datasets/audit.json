@@ -1,0 +1,157 @@
+{
+  "source": "C:\\Users\\费代强\\OneDrive\\桌面\\大创项目\\结题math\\datasets\\processed\\combined.jsonl",
+  "stats": {
+    "GSM8K": {
+      "total": 100,
+      "verifier_pass": 100,
+      "usable": 100
+    },
+    "MATH-500": {
+      "total": 100,
+      "verifier_pass": 68,
+      "usable": 68,
+      "too_short": 32
+    },
+    "NuminaMath-CoT": {
+      "total": 100,
+      "verifier_pass": 97,
+      "usable": 99,
+      "manual_required": 2,
+      "missing_fields": 1
+    }
+  },
+  "rejected": [
+    {
+      "id": "math500_test/prealgebra/1458.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/1214.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/572.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/number_theory/1002.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/346.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/1031.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/counting_and_probability/190.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/954.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/number_theory/627.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/precalculus/43.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/114.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/864.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/1078.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/counting_and_probability/1014.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/1128.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/1747.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/1842.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/precalculus/1303.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/2064.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/number_theory/46.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/1203.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/intermediate_algebra/134.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/counting_and_probability/913.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/2427.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/precalculus/1199.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/intermediate_algebra/190.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/intermediate_algebra/1410.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/intermediate_algebra/1102.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/1317.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/intermediate_algebra/431.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/prealgebra/505.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "math500_test/algebra/1787.json",
+      "reason": "fewer than 3 reasoning nodes"
+    },
+    {
+      "id": "numina_28",
+      "reason": "missing: answer"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "seed": 20260927,
+  "requested_per_dataset": 100,
+  "counts": {
+    "gsm8k": 100,
+    "math500": 100,
+    "numinamath_cot": 100
+  },
+  "sources": {
+    "GSM8K": "https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl",
+    "MATH-500": "https://huggingface.co/datasets/HuggingFaceH4/MATH-500/resolve/main/test.jsonl",
+    "NuminaMath-CoT": "https://huggingface.co/datasets/AI-MO/NuminaMath-CoT"
+  }
+}

@@ -1,0 +1,271 @@
+﻿id,dataset,subject,difficulty,method,accepted,aggregate_score,quality_gain,retained_aggregate_score,answer_correct,answer_status,added_node_count,attempts,similarity,logic_consistency,formula_correctness,completeness,reasoning_gain
+gsm8k_test_59,GSM8K,arithmetic_word_problem,grade_school,original,True,0.808168,0.0,0.808168,True,correct,0,0,0.888889,0.86,0.68,0.85,0.788636
+gsm8k_test_59,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.78818,-0.019988,0.808168,True,correct,1,1,1.0,0.45,0.68,1.0,0.982237
+gsm8k_test_59,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.86367,0.055502,0.86367,True,correct,1,2,1.0,0.45,1.0,1.0,0.974528
+gsm8k_test_97,GSM8K,arithmetic_word_problem,grade_school,original,True,0.82439,0.0,0.82439,True,correct,0,0,1.0,0.86,0.68,0.85,0.766412
+gsm8k_test_97,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.740651,-0.083739,0.82439,True,correct,1,1,1.0,0.45,0.68,0.85,0.852655
+gsm8k_test_97,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.767042,-0.057348,0.82439,True,correct,1,3,1.0,0.45,0.68,1.0,0.857895
+gsm8k_test_69,GSM8K,arithmetic_word_problem,grade_school,original,True,0.768833,0.0,0.768833,True,correct,0,0,0.703704,0.86,0.68,1.0,0.603333
+gsm8k_test_69,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.763821,-0.005012,0.768833,True,correct,1,1,1.0,0.45,0.68,1.0,0.838947
+gsm8k_test_69,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.765801,-0.003033,0.768833,True,correct,1,3,1.0,0.45,0.68,1.0,0.850593
+gsm8k_test_55,GSM8K,arithmetic_word_problem,grade_school,original,True,0.831789,0.0,0.831789,True,correct,0,0,1.0,0.86,0.68,0.85,0.809938
+gsm8k_test_55,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.768583,-0.063207,0.831789,True,correct,1,1,1.0,0.45,0.68,1.0,0.866957
+gsm8k_test_55,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.84811,0.016321,0.84811,True,correct,1,3,1.0,0.45,1.0,1.0,0.883
+gsm8k_test_38,GSM8K,arithmetic_word_problem,grade_school,original,True,0.772742,0.0,0.772742,True,correct,0,0,0.689655,0.86,0.68,0.85,0.7912
+gsm8k_test_38,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.754426,-0.018316,0.772742,True,correct,1,1,1.0,0.45,0.68,0.85,0.933684
+gsm8k_test_38,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.754426,-0.018316,0.772742,True,correct,1,1,1.0,0.45,0.68,0.85,0.933684
+gsm8k_test_96,GSM8K,arithmetic_word_problem,grade_school,original,True,0.853426,0.0,0.853426,True,correct,0,0,1.0,0.86,0.68,0.85,0.937209
+gsm8k_test_96,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.712656,-0.14077,0.853426,True,correct,1,1,1.0,0.45,0.48,0.85,0.97033
+gsm8k_test_96,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.760919,-0.092507,0.853426,True,correct,1,3,1.0,0.45,0.68,0.85,0.971875
+gsm8k_test_16,GSM8K,arithmetic_word_problem,grade_school,original,True,0.856047,0.0,0.856047,True,correct,0,0,1.0,0.86,0.68,0.85,0.952632
+gsm8k_test_16,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.762739,-0.093309,0.856047,True,correct,1,1,1.0,0.45,0.68,0.85,0.982581
+gsm8k_test_16,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.928495,0.072447,0.928495,True,correct,1,2,1.0,0.86,1.0,0.85,0.927027
+gsm8k_test_31,GSM8K,arithmetic_word_problem,grade_school,original,True,0.867546,0.0,0.867546,True,correct,0,0,1.0,0.86,0.68,1.0,0.87027
+gsm8k_test_31,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.833737,-0.033808,0.867546,True,correct,1,1,1.0,0.45,1.0,1.0,0.798456
+gsm8k_test_31,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.833737,-0.033808,0.867546,True,correct,1,1,1.0,0.45,1.0,1.0,0.798456
+gsm8k_test_37,GSM8K,arithmetic_word_problem,grade_school,original,True,0.8139,0.0,0.8139,True,correct,0,0,0.638064,0.86,0.68,1.0,0.937931
+gsm8k_test_37,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.7606,-0.0533,0.8139,True,correct,1,1,1.0,0.45,0.68,0.85,0.97
+gsm8k_test_37,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.7606,-0.0533,0.8139,True,correct,1,1,1.0,0.45,0.68,0.85,0.97
+math500_test/precalculus/96.json,MATH-500,Precalculus,3,original,True,0.83536,0.0,0.83536,True,correct,0,0,1.0,0.86,0.68,0.85,0.830939
+math500_test/precalculus/96.json,MATH-500,Precalculus,3,one_shot,False,0.759996,-0.075364,0.83536,True,correct,1,1,1.0,0.45,0.68,1.0,0.816447
+math500_test/precalculus/96.json,MATH-500,Precalculus,3,feedback,False,0.765772,-0.069588,0.83536,True,correct,1,2,1.0,0.45,0.68,1.0,0.850423
+math500_test/number_theory/533.json,MATH-500,Number Theory,4,original,True,0.694745,0.0,0.694745,True,correct,0,0,1.0,0.86,0.0,1.0,0.813793
+math500_test/number_theory/533.json,MATH-500,Number Theory,4,one_shot,False,0.601896,-0.092849,0.694745,True,correct,1,1,1.0,0.45,0.0,1.0,0.846445
+math500_test/number_theory/533.json,MATH-500,Number Theory,4,feedback,False,0.775775,0.08103,0.694745,True,correct,0,3,1.0,0.45,0.68,1.0,0.909264
+math500_test/algebra/873.json,MATH-500,Algebra,4,original,True,0.703853,0.0,0.703853,True,correct,0,0,1.0,0.86,0.0,1.0,0.867368
+math500_test/algebra/873.json,MATH-500,Algebra,4,one_shot,False,0.782604,0.078752,0.703853,True,correct,1,1,1.0,0.45,0.68,1.0,0.949438
+math500_test/algebra/873.json,MATH-500,Algebra,4,feedback,False,0.782604,0.078752,0.703853,True,correct,1,1,1.0,0.45,0.68,1.0,0.949438
+math500_test/precalculus/801.json,MATH-500,Precalculus,3,original,True,0.836282,0.0,0.836282,True,correct,0,0,1.0,0.86,0.68,0.85,0.836364
+math500_test/precalculus/801.json,MATH-500,Precalculus,3,one_shot,False,0.7886,-0.047681,0.836282,True,correct,1,1,1.0,0.45,0.68,1.0,0.984709
+math500_test/precalculus/801.json,MATH-500,Precalculus,3,feedback,False,0.7886,-0.047681,0.836282,True,correct,1,1,1.0,0.45,0.68,1.0,0.984709
+math500_test/intermediate_algebra/1454.json,MATH-500,Intermediate Algebra,5,original,True,0.861351,0.0,0.861351,True,correct,0,0,1.0,0.86,0.68,0.85,0.983832
+math500_test/intermediate_algebra/1454.json,MATH-500,Intermediate Algebra,5,one_shot,False,0.712177,-0.149175,0.861351,True,correct,1,1,1.0,0.45,0.48,0.85,0.967509
+math500_test/intermediate_algebra/1454.json,MATH-500,Intermediate Algebra,5,feedback,False,0.785991,-0.07536,0.861351,True,correct,1,3,1.0,0.45,0.68,1.0,0.969362
+math500_test/number_theory/931.json,MATH-500,Number Theory,2,original,True,0.8299,0.0,0.8299,True,correct,0,0,1.0,0.86,0.75,0.85,0.7
+math500_test/number_theory/931.json,MATH-500,Number Theory,2,one_shot,False,0.787099,-0.042801,0.8299,True,correct,1,1,1.0,0.45,0.68,1.0,0.975879
+math500_test/number_theory/931.json,MATH-500,Number Theory,2,feedback,False,0.787099,-0.042801,0.8299,True,correct,1,1,1.0,0.45,0.68,1.0,0.975879
+math500_test/counting_and_probability/25149.json,MATH-500,Counting & Probability,4,original,True,0.810506,0.0,0.810506,True,correct,0,0,1.0,0.86,0.75,0.85,0.585915
+math500_test/counting_and_probability/25149.json,MATH-500,Counting & Probability,4,one_shot,False,0.785456,-0.02505,0.810506,True,correct,1,1,1.0,0.45,0.68,1.0,0.966212
+math500_test/counting_and_probability/25149.json,MATH-500,Counting & Probability,4,feedback,False,0.786595,-0.023911,0.810506,True,correct,1,2,1.0,0.45,0.68,1.0,0.97291
+math500_test/intermediate_algebra/362.json,MATH-500,Intermediate Algebra,4,original,True,0.841788,0.0,0.841788,True,correct,0,0,1.0,0.86,0.68,0.85,0.86875
+math500_test/intermediate_algebra/362.json,MATH-500,Intermediate Algebra,4,one_shot,False,0.742884,-0.098903,0.841788,True,correct,1,1,1.0,0.45,0.68,0.85,0.865789
+math500_test/intermediate_algebra/362.json,MATH-500,Intermediate Algebra,4,feedback,False,0.77103,-0.070758,0.841788,True,correct,1,3,1.0,0.45,0.68,1.0,0.88135
+math500_test/precalculus/989.json,MATH-500,Precalculus,4,original,True,0.594129,0.0,0.594129,True,correct,0,0,0.161031,0.86,0.48,0.85,0.582609
+math500_test/precalculus/989.json,MATH-500,Precalculus,4,one_shot,False,0.741318,0.147189,0.594129,True,correct,1,1,1.0,0.45,0.68,0.85,0.856574
+math500_test/precalculus/989.json,MATH-500,Precalculus,4,feedback,False,0.793517,0.199388,0.594129,True,correct,1,2,1.0,0.86,0.48,0.85,0.867159
+math500_test/algebra/1035.json,MATH-500,Algebra,3,original,True,0.725339,0.0,0.725339,True,correct,0,0,0.555556,0.86,0.68,0.85,0.654348
+math500_test/algebra/1035.json,MATH-500,Algebra,3,one_shot,False,0.760093,0.034754,0.725339,True,correct,1,1,1.0,0.45,0.68,0.85,0.967016
+math500_test/algebra/1035.json,MATH-500,Algebra,3,feedback,False,0.784891,0.059552,0.725339,True,correct,1,3,1.0,0.45,0.68,1.0,0.962887
+numina_9,NuminaMath-CoT,synthetic_math,mixed,original,True,0.819348,0.0,0.819348,True,correct,0,0,1.0,0.86,0.75,0.85,0.637931
+numina_9,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.769432,-0.049917,0.819348,True,correct,1,1,1.0,0.45,0.68,1.0,0.871951
+numina_9,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.788655,-0.030693,0.819348,True,correct,1,3,1.0,0.45,0.75,1.0,0.886207
+numina_0,NuminaMath-CoT,synthetic_math,mixed,original,True,0.693031,0.0,0.693031,True,correct,0,0,0.37037,0.86,0.68,0.85,0.660377
+numina_0,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.733187,0.040157,0.693031,True,correct,1,1,1.0,0.45,0.68,0.85,0.80875
+numina_0,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.779867,0.086836,0.693031,True,correct,1,3,1.0,0.45,0.68,1.0,0.933333
+numina_17,NuminaMath-CoT,synthetic_amc,mixed,original,True,0.862437,0.0,0.862437,True,correct,0,0,1.0,0.86,0.68,0.85,0.990217
+numina_17,NuminaMath-CoT,synthetic_amc,mixed,one_shot,False,0.742415,-0.120022,0.862437,True,correct,1,1,1.0,0.45,0.48,1.0,0.995385
+numina_17,NuminaMath-CoT,synthetic_amc,mixed,feedback,False,0.790563,-0.071874,0.862437,True,correct,1,2,1.0,0.45,0.68,1.0,0.99625
+numina_50,NuminaMath-CoT,synthetic_amc,mixed,original,True,0.876298,0.0,0.876298,True,correct,0,0,1.0,0.86,0.75,1.0,0.822932
+numina_50,NuminaMath-CoT,synthetic_amc,mixed,one_shot,False,0.777604,-0.098694,0.876298,True,correct,1,1,1.0,0.45,0.75,1.0,0.8212
+numina_50,NuminaMath-CoT,synthetic_amc,mixed,feedback,False,0.779174,-0.097125,0.876298,True,correct,1,3,1.0,0.45,0.75,1.0,0.830435
+numina_38,NuminaMath-CoT,cn_k12,mixed,original,True,0.82773,0.0,0.82773,True,correct,0,0,1.0,0.86,0.75,0.85,0.687234
+numina_38,NuminaMath-CoT,cn_k12,mixed,one_shot,False,0.767465,-0.060264,0.82773,True,correct,1,1,1.0,0.45,0.75,1.0,0.761561
+numina_38,NuminaMath-CoT,cn_k12,mixed,feedback,False,0.790788,-0.036942,0.82773,True,correct,1,2,1.0,0.45,0.75,1.0,0.89875
+numina_83,NuminaMath-CoT,olympiads,mixed,original,True,0.731704,0.0,0.731704,True,correct,0,0,0.273321,0.86,0.68,0.85,0.990625
+numina_83,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.641115,-0.090589,0.731704,True,correct,1,1,0.45977,0.45,0.68,0.85,0.839157
+numina_83,NuminaMath-CoT,olympiads,mixed,feedback,True,0.835818,0.104114,0.835818,True,correct,1,2,1.0,0.86,0.68,0.85,0.833636
+numina_13,NuminaMath-CoT,orca_math,mixed,original,True,0.826763,0.0,0.826763,True,correct,0,0,0.88411,0.86,0.68,0.85,0.903077
+numina_13,NuminaMath-CoT,orca_math,mixed,one_shot,False,0.767535,-0.059228,0.826763,True,correct,1,1,1.0,0.45,0.68,1.0,0.860791
+numina_13,NuminaMath-CoT,orca_math,mixed,feedback,True,0.843077,0.016314,0.843077,True,correct,1,2,1.0,0.86,0.68,0.85,0.876336
+numina_6,NuminaMath-CoT,orca_math,mixed,original,True,0.709882,0.0,0.709882,True,correct,0,0,0.2849,0.86,0.68,0.85,0.85
+numina_6,NuminaMath-CoT,orca_math,mixed,one_shot,True,0.846003,0.136121,0.846003,True,correct,1,1,0.989729,0.86,0.68,0.85,0.904425
+numina_6,NuminaMath-CoT,orca_math,mixed,feedback,True,0.846003,0.136121,0.846003,True,correct,1,1,0.989729,0.86,0.68,0.85,0.904425
+numina_47,NuminaMath-CoT,synthetic_amc,mixed,original,True,0.8641,0.0,0.8641,True,correct,0,0,1.0,0.86,0.68,0.85,1.0
+numina_47,NuminaMath-CoT,synthetic_amc,mixed,one_shot,False,0.7912,-0.0729,0.8641,True,correct,1,1,1.0,0.45,0.68,1.0,1.0
+numina_47,NuminaMath-CoT,synthetic_amc,mixed,feedback,False,0.7912,-0.0729,0.8641,True,correct,1,1,1.0,0.45,0.68,1.0,1.0
+numina_67,NuminaMath-CoT,synthetic_amc,mixed,original,True,0.938894,0.0,0.938894,True,correct,0,0,1.0,0.86,1.0,1.0,0.838202
+numina_67,NuminaMath-CoT,synthetic_amc,mixed,one_shot,False,0.770743,-0.168151,0.938894,True,correct,1,1,1.0,0.45,0.68,1.0,0.879666
+numina_67,NuminaMath-CoT,synthetic_amc,mixed,feedback,False,0.829336,-0.109559,0.938894,True,correct,1,2,1.0,0.45,1.0,1.0,0.772563
+gsm8k_test_94,GSM8K,arithmetic_word_problem,grade_school,original,True,0.768781,0.0,0.768781,True,correct,0,0,0.659341,0.86,0.68,0.85,0.8
+gsm8k_test_94,GSM8K,arithmetic_word_problem,grade_school,one_shot,True,0.837864,0.069082,0.837864,True,correct,1,1,1.0,0.45,1.0,0.85,0.972727
+gsm8k_test_94,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.837864,0.069082,0.837864,True,correct,1,1,1.0,0.45,1.0,0.85,0.972727
+gsm8k_test_19,GSM8K,arithmetic_word_problem,grade_school,original,True,0.806725,0.0,0.806725,True,correct,0,0,1.0,0.86,0.68,0.85,0.6625
+gsm8k_test_19,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.739932,-0.066793,0.806725,True,correct,1,1,1.0,0.45,0.68,0.85,0.848421
+gsm8k_test_19,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.739932,-0.066793,0.806725,True,correct,1,1,1.0,0.45,0.68,0.85,0.848421
+gsm8k_test_87,GSM8K,arithmetic_word_problem,grade_school,original,True,0.830404,0.0,0.830404,True,correct,0,0,1.0,0.86,0.68,0.85,0.801786
+gsm8k_test_87,GSM8K,arithmetic_word_problem,grade_school,one_shot,True,0.857038,0.026635,0.857038,True,correct,1,1,1.0,0.86,0.68,0.85,0.958462
+gsm8k_test_87,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.857038,0.026635,0.857038,True,correct,1,1,1.0,0.86,0.68,0.85,0.958462
+gsm8k_test_4,GSM8K,arithmetic_word_problem,grade_school,original,True,0.852752,0.0,0.852752,True,correct,0,0,1.0,0.86,0.68,1.0,0.783246
+gsm8k_test_4,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.600877,-0.251875,0.852752,True,correct,1,1,1.0,0.45,0.0,1.0,0.840455
+gsm8k_test_4,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.811459,-0.041293,0.852752,True,correct,1,3,0.968188,0.86,0.48,1.0,0.856383
+gsm8k_test_72,GSM8K,arithmetic_word_problem,grade_school,original,True,0.885144,0.0,0.885144,True,correct,0,0,1.0,0.86,0.68,1.0,0.973786
+gsm8k_test_72,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.761244,-0.1239,0.885144,True,correct,1,1,1.0,0.45,0.68,0.85,0.973786
+gsm8k_test_72,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.854733,-0.030411,0.885144,True,correct,1,2,1.0,0.86,0.68,0.85,0.944898
+gsm8k_test_95,GSM8K,arithmetic_word_problem,grade_school,original,True,0.767507,0.0,0.767507,True,correct,0,0,0.492349,0.86,0.68,0.85,0.969318
+gsm8k_test_95,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.652602,-0.114904,0.767507,True,correct,1,1,1.0,0.45,0.48,0.65,0.817073
+gsm8k_test_95,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.787375,0.019868,0.767507,True,correct,1,2,1.0,0.45,0.68,1.0,0.9775
+gsm8k_test_42,GSM8K,arithmetic_word_problem,grade_school,original,True,0.724098,0.0,0.724098,True,correct,0,0,0.48,0.86,0.68,0.85,0.727049
+gsm8k_test_42,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.733917,0.009819,0.724098,True,correct,1,1,1.0,0.45,0.68,0.85,0.813043
+gsm8k_test_42,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.77782,0.053721,0.724098,True,correct,1,3,1.0,0.45,0.68,1.0,0.921293
+gsm8k_test_41,GSM8K,arithmetic_word_problem,grade_school,original,True,0.85735,0.0,0.85735,True,correct,0,0,1.0,0.86,0.68,0.85,0.960294
+gsm8k_test_41,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.762468,-0.094882,0.85735,True,correct,1,1,1.0,0.45,0.68,0.85,0.980986
+gsm8k_test_41,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.76268,-0.09467,0.85735,True,correct,1,2,1.0,0.45,0.68,0.85,0.982237
+gsm8k_test_70,GSM8K,arithmetic_word_problem,grade_school,original,True,0.782234,0.0,0.782234,True,correct,0,0,0.695505,0.86,0.68,1.0,0.69084
+gsm8k_test_70,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.763382,-0.018852,0.782234,True,correct,1,1,1.0,0.45,0.68,1.0,0.836364
+gsm8k_test_70,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.83743,0.055197,0.83743,True,correct,1,2,1.0,0.86,0.68,0.85,0.843119
+gsm8k_test_29,GSM8K,arithmetic_word_problem,grade_school,original,True,0.86021,0.0,0.86021,True,correct,0,0,1.0,0.86,0.68,0.85,0.977119
+gsm8k_test_29,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.681674,-0.178537,0.86021,True,correct,1,1,1.0,0.45,0.48,0.8,0.838079
+gsm8k_test_29,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.829233,-0.030978,0.86021,True,correct,1,2,1.0,0.86,0.68,0.85,0.794898
+gsm8k_test_10,GSM8K,arithmetic_word_problem,grade_school,original,True,0.837522,0.0,0.837522,True,correct,0,0,0.886896,0.86,0.68,0.85,0.963415
+gsm8k_test_10,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.757474,-0.080048,0.837522,True,correct,1,1,1.0,0.45,0.68,0.85,0.951613
+gsm8k_test_10,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.785575,-0.051947,0.837522,True,correct,1,2,1.0,0.45,0.68,1.0,0.966912
+gsm8k_test_80,GSM8K,arithmetic_word_problem,grade_school,original,True,0.822383,0.0,0.822383,True,correct,0,0,0.827887,0.86,0.68,1.0,0.786842
+gsm8k_test_80,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.7132,-0.109183,0.822383,True,correct,1,1,1.0,0.45,0.48,0.85,0.973529
+gsm8k_test_80,GSM8K,arithmetic_word_problem,grade_school,feedback,True,0.85161,0.029227,0.85161,True,correct,1,2,1.0,0.86,0.68,0.85,0.926531
+gsm8k_test_64,GSM8K,arithmetic_word_problem,grade_school,original,True,0.83389,0.0,0.83389,True,correct,0,0,1.0,0.86,0.68,0.85,0.822293
+gsm8k_test_64,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.742021,-0.091868,0.83389,True,correct,1,1,1.0,0.45,0.68,0.85,0.860714
+gsm8k_test_64,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.742021,-0.091868,0.83389,True,correct,1,1,1.0,0.45,0.68,0.85,0.860714
+gsm8k_test_43,GSM8K,arithmetic_word_problem,grade_school,original,True,0.885957,0.0,0.885957,True,correct,0,0,1.0,0.86,0.68,1.0,0.978571
+gsm8k_test_43,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.762086,-0.123871,0.885957,True,correct,1,1,1.0,0.45,0.68,0.85,0.97874
+gsm8k_test_43,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.762086,-0.123871,0.885957,True,correct,1,1,1.0,0.45,0.68,0.85,0.97874
+gsm8k_test_48,GSM8K,arithmetic_word_problem,grade_school,original,True,0.844255,0.0,0.844255,True,correct,0,0,0.91358,0.86,0.68,0.85,0.974766
+gsm8k_test_48,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.788547,-0.055708,0.844255,True,correct,1,1,1.0,0.45,0.68,1.0,0.984393
+gsm8k_test_48,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.788745,-0.055509,0.844255,True,correct,1,3,1.0,0.45,0.68,1.0,0.985561
+gsm8k_test_50,GSM8K,arithmetic_word_problem,grade_school,original,True,0.88144,0.0,0.88144,True,correct,0,0,1.0,0.86,0.68,1.0,0.952
+gsm8k_test_50,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.7147,-0.16674,0.88144,True,correct,1,1,1.0,0.45,0.48,0.85,0.982353
+gsm8k_test_50,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.760378,-0.121062,0.88144,True,correct,1,2,1.0,0.45,0.68,0.85,0.968696
+gsm8k_test_76,GSM8K,arithmetic_word_problem,grade_school,original,True,0.837744,0.0,0.837744,True,correct,0,0,0.880999,0.86,0.68,0.85,0.970968
+gsm8k_test_76,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.655056,-0.182688,0.837744,True,correct,1,1,1.0,0.45,0.48,0.65,0.831507
+gsm8k_test_76,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.742115,-0.09563,0.837744,True,correct,1,2,1.0,0.45,0.48,1.0,0.993617
+gsm8k_test_77,GSM8K,arithmetic_word_problem,grade_school,original,True,0.854386,0.0,0.854386,True,correct,0,0,1.0,0.86,0.68,0.85,0.942857
+gsm8k_test_77,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.715416,-0.138969,0.854386,True,correct,1,1,1.0,0.45,0.48,0.85,0.986567
+gsm8k_test_77,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.760724,-0.093661,0.854386,True,correct,1,2,1.0,0.45,0.68,0.85,0.970732
+gsm8k_test_9,GSM8K,arithmetic_word_problem,grade_school,original,True,0.680325,0.0,0.680325,True,correct,0,0,0.238751,0.86,0.68,0.85,0.725
+gsm8k_test_9,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.750091,0.069766,0.680325,True,correct,1,1,0.906269,0.45,0.68,1.0,0.857426
+gsm8k_test_9,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.757804,0.077479,0.680325,True,correct,1,3,1.0,0.45,0.68,1.0,0.803553
+gsm8k_test_47,GSM8K,arithmetic_word_problem,grade_school,original,True,0.852767,0.0,0.852767,True,correct,0,0,1.0,0.86,0.68,1.0,0.783333
+gsm8k_test_47,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.75743,-0.095337,0.852767,True,correct,1,1,1.0,0.45,0.68,0.85,0.951351
+gsm8k_test_47,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.759119,-0.093647,0.852767,True,correct,1,2,1.0,0.45,0.68,0.85,0.96129
+gsm8k_test_20,GSM8K,arithmetic_word_problem,grade_school,original,True,0.86021,0.0,0.86021,True,correct,0,0,1.0,0.86,0.68,0.85,0.977119
+gsm8k_test_20,GSM8K,arithmetic_word_problem,grade_school,one_shot,False,0.864143,0.003933,0.86021,True,correct,1,1,1.0,0.45,1.0,1.0,0.977311
+gsm8k_test_20,GSM8K,arithmetic_word_problem,grade_school,feedback,False,0.864143,0.003933,0.86021,True,correct,1,1,1.0,0.45,1.0,1.0,0.977311
+math500_test/intermediate_algebra/1930.json,MATH-500,Intermediate Algebra,5,original,True,0.839596,0.0,0.839596,True,correct,0,0,1.0,0.86,0.68,0.85,0.855859
+math500_test/intermediate_algebra/1930.json,MATH-500,Intermediate Algebra,5,one_shot,False,0.77383,-0.065766,0.839596,True,correct,1,1,1.0,0.45,0.68,1.0,0.897826
+math500_test/intermediate_algebra/1930.json,MATH-500,Intermediate Algebra,5,feedback,False,0.77586,-0.063736,0.839596,True,correct,1,3,1.0,0.45,0.68,1.0,0.909763
+math500_test/intermediate_algebra/1197.json,MATH-500,Intermediate Algebra,5,original,True,0.768217,0.0,0.768217,True,correct,0,0,0.160367,0.86,1.0,0.85,0.873239
+math500_test/intermediate_algebra/1197.json,MATH-500,Intermediate Algebra,5,one_shot,True,0.833098,0.064881,0.833098,True,correct,1,1,1.0,0.45,1.0,0.85,0.944693
+math500_test/intermediate_algebra/1197.json,MATH-500,Intermediate Algebra,5,feedback,True,0.833098,0.064881,0.833098,True,correct,1,1,1.0,0.45,1.0,0.85,0.944693
+math500_test/algebra/1578.json,MATH-500,Algebra,4,original,True,0.761654,0.0,0.761654,True,correct,0,0,1.0,0.86,0.48,0.85,0.67973
+math500_test/algebra/1578.json,MATH-500,Algebra,4,one_shot,False,0.773814,0.01216,0.761654,True,correct,1,1,1.0,0.45,0.68,1.0,0.897727
+math500_test/algebra/1578.json,MATH-500,Algebra,4,feedback,False,0.7861,0.024446,0.761654,True,correct,1,3,1.0,0.45,0.68,1.0,0.97
+math500_test/number_theory/820.json,MATH-500,Number Theory,5,original,True,0.724461,0.0,0.724461,True,correct,0,0,1.0,0.86,0.0,1.0,0.988593
+math500_test/number_theory/820.json,MATH-500,Number Theory,5,one_shot,False,0.789726,0.065266,0.724461,True,correct,0,1,1.0,0.45,0.68,1.0,0.991332
+math500_test/number_theory/820.json,MATH-500,Number Theory,5,feedback,False,0.789726,0.065266,0.724461,True,correct,0,1,1.0,0.45,0.68,1.0,0.991332
+math500_test/number_theory/572.json,MATH-500,Number Theory,3,original,True,0.821571,0.0,0.821571,True,correct,0,0,1.0,0.86,0.75,0.85,0.651005
+math500_test/number_theory/572.json,MATH-500,Number Theory,3,one_shot,False,0.79362,-0.027951,0.821571,True,correct,1,1,1.0,0.45,0.75,1.0,0.915414
+math500_test/number_theory/572.json,MATH-500,Number Theory,3,feedback,False,0.795376,-0.026195,0.821571,True,correct,1,3,1.0,0.45,0.75,1.0,0.925743
+math500_test/intermediate_algebra/1151.json,MATH-500,Intermediate Algebra,3,original,True,0.781769,0.0,0.781769,True,correct,0,0,0.812261,0.86,0.68,0.85,0.714483
+math500_test/intermediate_algebra/1151.json,MATH-500,Intermediate Algebra,3,one_shot,False,0.752772,-0.028997,0.781769,True,correct,1,1,1.0,0.45,0.68,1.0,0.773953
+math500_test/intermediate_algebra/1151.json,MATH-500,Intermediate Algebra,3,feedback,False,0.770446,-0.011323,0.781769,True,correct,1,2,1.0,0.45,0.68,1.0,0.877918
+math500_test/prealgebra/1655.json,MATH-500,Prealgebra,5,original,True,0.942862,0.0,0.942862,True,correct,0,0,1.0,0.86,1.0,1.0,0.861538
+math500_test/prealgebra/1655.json,MATH-500,Prealgebra,5,one_shot,False,0.844651,-0.098211,0.942862,True,correct,1,1,1.0,0.45,1.0,1.0,0.862651
+math500_test/prealgebra/1655.json,MATH-500,Prealgebra,5,feedback,False,0.844651,-0.098211,0.942862,True,correct,1,1,1.0,0.45,1.0,1.0,0.862651
+math500_test/geometry/434.json,MATH-500,Geometry,1,original,True,0.618781,0.0,0.618781,True,correct,0,0,0.21164,0.86,0.75,0.85,0.292857
+math500_test/geometry/434.json,MATH-500,Geometry,1,one_shot,False,0.785239,0.166458,0.618781,True,correct,1,1,1.0,0.45,0.68,1.0,0.964935
+math500_test/geometry/434.json,MATH-500,Geometry,1,feedback,True,0.86324,0.244459,0.86324,True,correct,1,2,1.0,0.45,1.0,1.0,0.972
+math500_test/algebra/1332.json,MATH-500,Algebra,3,original,True,0.712055,0.0,0.712055,True,correct,0,0,0.606061,0.86,0.68,0.85,0.522727
+math500_test/algebra/1332.json,MATH-500,Algebra,3,one_shot,False,0.753318,0.041264,0.712055,True,correct,1,1,1.0,0.45,0.68,0.85,0.927168
+math500_test/algebra/1332.json,MATH-500,Algebra,3,feedback,True,0.834961,0.122906,0.834961,True,correct,1,3,1.0,0.86,0.5,1.0,0.93271
+math500_test/algebra/1425.json,MATH-500,Algebra,2,original,True,0.847656,0.0,0.847656,True,correct,0,0,1.0,0.86,0.68,0.85,0.903271
+math500_test/algebra/1425.json,MATH-500,Algebra,2,one_shot,False,0.749256,-0.0984,0.847656,True,correct,1,1,1.0,0.45,0.68,0.85,0.903271
+math500_test/algebra/1425.json,MATH-500,Algebra,2,feedback,False,0.791509,-0.056147,0.847656,True,correct,1,2,1.0,0.45,0.75,1.0,0.902994
+math500_test/algebra/694.json,MATH-500,Algebra,3,original,True,0.906302,0.0,0.906302,True,correct,0,0,1.0,0.86,1.0,0.85,0.796482
+math500_test/algebra/694.json,MATH-500,Algebra,3,one_shot,False,0.812837,-0.093465,0.906302,True,correct,1,1,1.0,0.45,1.0,0.85,0.82551
+math500_test/algebra/694.json,MATH-500,Algebra,3,feedback,False,0.906742,0.00044,0.906302,True,correct,1,3,1.0,0.86,1.0,0.85,0.79907
+math500_test/precalculus/902.json,MATH-500,Precalculus,5,original,True,0.636988,0.0,0.636988,True,correct,0,0,0.21164,0.86,0.68,0.85,0.49878
+math500_test/precalculus/902.json,MATH-500,Precalculus,5,one_shot,False,0.787579,0.150591,0.636988,True,correct,1,1,1.0,0.45,0.68,1.0,0.978698
+math500_test/precalculus/902.json,MATH-500,Precalculus,5,feedback,False,0.787786,0.150798,0.636988,True,correct,1,2,1.0,0.45,0.68,1.0,0.979919
+math500_test/prealgebra/1742.json,MATH-500,Prealgebra,3,original,True,0.841433,0.0,0.841433,True,correct,0,0,1.0,0.86,0.68,0.85,0.866667
+math500_test/prealgebra/1742.json,MATH-500,Prealgebra,3,one_shot,False,0.775706,-0.065727,0.841433,True,correct,1,1,1.0,0.45,0.68,1.0,0.908861
+math500_test/prealgebra/1742.json,MATH-500,Prealgebra,3,feedback,False,0.844866,0.003432,0.841433,True,correct,1,2,1.0,0.86,0.68,0.85,0.886857
+math500_test/number_theory/679.json,MATH-500,Number Theory,2,original,True,0.622693,0.0,0.622693,True,correct,0,0,0.229885,0.86,0.75,0.85,0.296552
+math500_test/number_theory/679.json,MATH-500,Number Theory,2,one_shot,False,0.756568,0.133875,0.622693,True,correct,1,1,1.0,0.45,0.75,1.0,0.697458
+math500_test/number_theory/679.json,MATH-500,Number Theory,2,feedback,False,0.772202,0.149509,0.622693,True,correct,1,3,1.0,0.45,0.75,1.0,0.789423
+math500_test/number_theory/1000.json,MATH-500,Number Theory,5,original,True,0.71423,0.0,0.71423,True,correct,0,0,1.0,0.86,0.0,1.0,0.928409
+math500_test/number_theory/1000.json,MATH-500,Number Theory,5,one_shot,False,0.614771,-0.099459,0.71423,True,correct,1,1,1.0,0.45,0.0,1.0,0.92218
+math500_test/number_theory/1000.json,MATH-500,Number Theory,5,feedback,False,0.7756,0.06137,0.71423,True,correct,1,3,1.0,0.45,0.68,1.0,0.908235
+math500_test/precalculus/779.json,MATH-500,Precalculus,2,original,True,0.639989,0.0,0.639989,True,correct,0,0,0.493827,0.86,0.48,0.85,0.5
+math500_test/precalculus/779.json,MATH-500,Precalculus,2,one_shot,False,0.732271,0.092283,0.639989,True,correct,1,1,1.0,0.45,0.48,1.0,0.935714
+math500_test/precalculus/779.json,MATH-500,Precalculus,2,feedback,False,0.7594,0.119411,0.639989,True,correct,1,2,1.0,0.45,0.68,0.85,0.962941
+math500_test/geometry/477.json,MATH-500,Geometry,3,original,True,0.644062,0.0,0.644062,True,correct,0,0,0.512821,0.86,0.48,0.85,0.503846
+math500_test/geometry/477.json,MATH-500,Geometry,3,one_shot,False,0.787762,0.1437,0.644062,True,correct,1,1,1.0,0.45,0.68,1.0,0.979775
+math500_test/geometry/477.json,MATH-500,Geometry,3,feedback,False,0.787762,0.1437,0.644062,True,correct,1,1,1.0,0.45,0.68,1.0,0.979775
+math500_test/number_theory/45.json,MATH-500,Number Theory,3,original,True,0.654987,0.0,0.654987,True,correct,0,0,0.863177,0.86,0.0,1.0,0.724793
+math500_test/number_theory/45.json,MATH-500,Number Theory,3,one_shot,False,0.716407,0.061421,0.654987,True,correct,1,1,1.0,0.45,0.48,1.0,0.842396
+math500_test/number_theory/45.json,MATH-500,Number Theory,3,feedback,False,0.772399,0.117412,0.654987,True,correct,1,2,1.0,0.45,0.68,1.0,0.889407
+math500_test/number_theory/515.json,MATH-500,Number Theory,3,original,True,0.800231,0.0,0.800231,True,correct,0,0,1.0,0.86,0.48,1.0,0.756652
+math500_test/number_theory/515.json,MATH-500,Number Theory,3,one_shot,False,0.761975,-0.038256,0.800231,True,correct,1,1,1.0,0.45,0.68,1.0,0.82809
+math500_test/number_theory/515.json,MATH-500,Number Theory,3,feedback,False,0.779121,-0.02111,0.800231,True,correct,1,3,1.0,0.45,0.68,1.0,0.928947
+math500_test/algebra/1814.json,MATH-500,Algebra,2,original,True,0.8299,0.0,0.8299,True,correct,0,0,1.0,0.86,0.75,0.85,0.7
+math500_test/algebra/1814.json,MATH-500,Algebra,2,one_shot,False,0.799921,-0.029979,0.8299,True,correct,1,1,1.0,0.45,0.75,1.0,0.952475
+math500_test/algebra/1814.json,MATH-500,Algebra,2,feedback,False,0.805747,-0.024153,0.8299,True,correct,1,3,1.0,0.45,0.75,1.0,0.986745
+numina_43,NuminaMath-CoT,olympiads,mixed,original,True,0.861507,0.0,0.861507,True,correct,0,0,1.0,0.86,0.68,0.85,0.984746
+numina_43,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.764919,-0.096587,0.861507,True,correct,1,1,1.0,0.45,0.68,0.85,0.995408
+numina_43,NuminaMath-CoT,olympiads,mixed,feedback,False,0.790552,-0.070955,0.861507,True,correct,1,3,1.0,0.45,0.68,1.0,0.996186
+numina_81,NuminaMath-CoT,olympiads,mixed,original,True,0.698583,0.0,0.698583,True,correct,0,0,0.129032,0.86,0.68,0.85,0.948571
+numina_81,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.720861,0.022278,0.698583,True,correct,1,1,0.818713,0.45,0.68,0.85,0.928191
+numina_81,NuminaMath-CoT,olympiads,mixed,feedback,False,0.78051,0.081927,0.698583,True,correct,1,3,1.0,0.45,0.68,1.0,0.937118
+numina_87,NuminaMath-CoT,synthetic_amc,mixed,original,True,0.862585,0.0,0.862585,True,correct,0,0,1.0,0.86,0.68,0.85,0.991089
+numina_87,NuminaMath-CoT,synthetic_amc,mixed,one_shot,False,0.867338,0.004753,0.862585,True,correct,1,1,1.0,0.45,1.0,1.0,0.996104
+numina_87,NuminaMath-CoT,synthetic_amc,mixed,feedback,False,0.867338,0.004753,0.862585,True,correct,1,1,1.0,0.45,1.0,1.0,0.996104
+numina_63,NuminaMath-CoT,orca_math,mixed,original,True,0.848088,0.0,0.848088,True,correct,0,0,1.0,0.86,0.68,0.85,0.905814
+numina_63,NuminaMath-CoT,orca_math,mixed,one_shot,False,0.7402,-0.107888,0.848088,True,correct,1,1,1.0,0.45,0.68,0.85,0.85
+numina_63,NuminaMath-CoT,orca_math,mixed,feedback,True,0.921316,0.073228,0.921316,True,correct,1,3,1.0,0.86,1.0,0.85,0.8848
+numina_44,NuminaMath-CoT,synthetic_math,mixed,original,True,0.749459,0.0,0.749459,True,correct,0,0,0.661578,0.86,0.68,0.85,0.683969
+numina_44,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.775343,0.025884,0.749459,True,correct,1,1,1.0,0.45,0.68,1.0,0.906723
+numina_44,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.777354,0.027895,0.749459,True,correct,1,2,1.0,0.45,0.68,1.0,0.918552
+numina_73,NuminaMath-CoT,olympiads,mixed,original,True,0.67973,0.0,0.67973,True,correct,0,0,0.892388,0.86,0.0,0.85,0.989412
+numina_73,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.86659,0.18686,0.67973,True,correct,0,1,1.0,0.45,1.0,1.0,0.991705
+numina_73,NuminaMath-CoT,olympiads,mixed,feedback,True,0.867597,0.187867,0.867597,True,correct,1,3,1.0,0.45,1.0,1.0,0.997632
+numina_39,NuminaMath-CoT,olympiads,mixed,original,True,0.813039,0.0,0.813039,True,correct,0,0,0.727969,0.86,0.68,0.85,0.987671
+numina_39,NuminaMath-CoT,olympiads,mixed,one_shot,True,0.841677,0.028639,0.841677,True,correct,1,1,1.0,0.45,1.0,0.85,0.995161
+numina_39,NuminaMath-CoT,olympiads,mixed,feedback,True,0.841677,0.028639,0.841677,True,correct,1,1,1.0,0.45,1.0,0.85,0.995161
+numina_74,NuminaMath-CoT,olympiads,mixed,original,True,0.862696,0.0,0.862696,True,correct,0,0,1.0,0.86,0.68,0.85,0.991743
+numina_74,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.790614,-0.072083,0.862696,True,correct,1,1,1.0,0.45,0.68,1.0,0.996552
+numina_74,NuminaMath-CoT,olympiads,mixed,feedback,False,0.837667,-0.025029,0.862696,True,correct,1,2,1.0,0.86,0.68,0.85,0.844512
+numina_68,NuminaMath-CoT,cn_k12,mixed,original,True,0.785564,0.0,0.785564,True,correct,0,0,0.165837,0.86,1.0,0.85,0.969492
+numina_68,NuminaMath-CoT,cn_k12,mixed,one_shot,True,0.860244,0.07468,0.860244,True,correct,1,1,1.0,0.45,1.0,1.0,0.954378
+numina_68,NuminaMath-CoT,cn_k12,mixed,feedback,True,0.860244,0.07468,0.860244,True,correct,1,1,1.0,0.45,1.0,1.0,0.954378
+numina_24,NuminaMath-CoT,aops_forum,mixed,original,True,0.746233,0.0,0.746233,True,correct,0,0,0.393408,0.86,0.68,0.85,0.948936
+numina_24,NuminaMath-CoT,aops_forum,mixed,one_shot,False,0.78733,0.041097,0.746233,True,correct,1,1,1.0,0.45,0.68,1.0,0.977234
+numina_24,NuminaMath-CoT,aops_forum,mixed,feedback,False,0.78733,0.041097,0.746233,True,correct,1,1,1.0,0.45,0.68,1.0,0.977234
+numina_41,NuminaMath-CoT,synthetic_math,mixed,original,True,0.772346,0.0,0.772346,True,correct,0,0,0.56353,0.86,0.68,0.85,0.922414
+numina_41,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.754328,-0.018017,0.772346,True,correct,1,1,1.0,0.45,0.68,0.85,0.933108
+numina_41,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.781022,0.008676,0.772346,True,correct,1,3,0.699588,0.86,0.68,0.85,0.829389
+numina_55,NuminaMath-CoT,cn_k12,mixed,original,True,0.909554,0.0,0.909554,True,correct,0,0,1.0,0.86,1.0,0.85,0.81561
+numina_55,NuminaMath-CoT,cn_k12,mixed,one_shot,False,0.77379,-0.135764,0.909554,True,correct,1,1,1.0,0.45,0.68,1.0,0.897586
+numina_55,NuminaMath-CoT,cn_k12,mixed,feedback,False,0.846415,-0.063139,0.909554,True,correct,1,3,1.0,0.45,1.0,1.0,0.873029
+numina_98,NuminaMath-CoT,orca_math,mixed,original,True,0.71401,0.0,0.71401,True,correct,0,0,0.483092,0.86,0.68,0.85,0.664433
+numina_98,NuminaMath-CoT,orca_math,mixed,one_shot,False,0.790207,0.076197,0.71401,True,correct,1,1,0.753623,0.86,0.68,0.85,0.826207
+numina_98,NuminaMath-CoT,orca_math,mixed,feedback,False,0.790207,0.076197,0.71401,True,correct,1,1,0.753623,0.86,0.68,0.85,0.826207
+numina_4,NuminaMath-CoT,synthetic_math,mixed,original,True,0.653068,0.0,0.653068,True,correct,0,0,0.330969,0.86,0.68,0.85,0.467021
+numina_4,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.753012,0.099944,0.653068,True,correct,1,1,1.0,0.45,0.68,0.85,0.925366
+numina_4,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.785056,0.131988,0.653068,True,correct,1,3,0.915033,0.86,0.68,0.85,0.625
+numina_45,NuminaMath-CoT,olympiads,mixed,original,True,0.719394,0.0,0.719394,True,correct,0,0,0.196078,0.86,0.68,0.85,1.0
+numina_45,NuminaMath-CoT,olympiads,mixed,one_shot,False,0.764309,0.044915,0.719394,True,correct,1,1,1.0,0.45,0.68,0.85,0.991818
+numina_45,NuminaMath-CoT,olympiads,mixed,feedback,False,0.764309,0.044915,0.719394,True,correct,1,1,1.0,0.45,0.68,0.85,0.991818
+numina_75,NuminaMath-CoT,synthetic_math,mixed,original,True,0.722945,0.0,0.722945,True,correct,0,0,1.0,0.86,0.0,1.0,0.979677
+numina_75,NuminaMath-CoT,synthetic_math,mixed,one_shot,False,0.739568,0.016623,0.722945,True,correct,1,1,1.0,0.45,0.48,1.0,0.978635
+numina_75,NuminaMath-CoT,synthetic_math,mixed,feedback,False,0.759105,0.03616,0.722945,True,correct,1,2,1.0,0.45,0.68,0.85,0.961207
+numina_36,NuminaMath-CoT,cn_k12,mixed,original,True,0.836444,0.0,0.836444,True,correct,0,0,0.97313,0.86,0.68,0.85,0.86577
+numina_36,NuminaMath-CoT,cn_k12,mixed,one_shot,False,0.751043,-0.085401,0.836444,True,correct,1,1,1.0,0.45,0.68,0.85,0.913785
+numina_36,NuminaMath-CoT,cn_k12,mixed,feedback,False,0.775552,-0.060892,0.836444,True,correct,1,3,1.0,0.45,0.68,1.0,0.907955
+numina_97,NuminaMath-CoT,cn_k12,mixed,original,True,0.869256,0.0,0.869256,True,correct,0,0,0.892532,0.86,0.68,1.0,0.994118
+numina_97,NuminaMath-CoT,cn_k12,mixed,one_shot,False,0.742446,-0.126809,0.869256,True,correct,1,1,1.0,0.45,0.48,1.0,0.995567
+numina_97,NuminaMath-CoT,cn_k12,mixed,feedback,False,0.867215,-0.00204,0.869256,True,correct,1,3,1.0,0.45,1.0,1.0,0.995385
+numina_77,NuminaMath-CoT,orca_math,mixed,original,True,0.8221,0.0,0.8221,True,correct,0,0,1.0,0.86,0.68,0.85,0.752941
+numina_77,NuminaMath-CoT,orca_math,mixed,one_shot,False,0.633997,-0.188103,0.8221,True,correct,1,1,1.0,0.45,0.48,0.65,0.707627
+numina_77,NuminaMath-CoT,orca_math,mixed,feedback,True,0.9103,0.0882,0.9103,True,correct,1,2,1.0,0.86,1.0,0.85,0.82
+numina_48,NuminaMath-CoT,cn_k12,mixed,original,True,0.781172,0.0,0.781172,True,correct,0,0,0.617702,0.86,0.68,0.85,0.916974
+numina_48,NuminaMath-CoT,cn_k12,mixed,one_shot,False,0.778809,-0.002363,0.781172,True,correct,1,1,1.0,0.45,0.68,1.0,0.927113
+numina_48,NuminaMath-CoT,cn_k12,mixed,feedback,True,0.832971,0.051799,0.832971,True,correct,1,3,1.0,0.45,1.0,0.85,0.943945

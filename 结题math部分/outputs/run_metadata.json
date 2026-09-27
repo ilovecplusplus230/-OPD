@@ -1,0 +1,18 @@
+{
+  "sample_count": 90,
+  "requested_count": 90,
+  "model": "gpt-5.6-terra",
+  "provider": "https://api.gpt.ge/v1",
+  "seed": 20260927,
+  "accept_threshold": 0.8,
+  "min_gain": 0.01,
+  "max_attempts": 3,
+  "api_calls_this_process": 0,
+  "prompt_tokens_this_process": 0,
+  "completion_tokens_this_process": 0,
+  "api_responses_in_saved_records": 250,
+  "prompt_tokens_in_saved_records": 369579,
+  "completion_tokens_in_saved_records": 81307,
+  "elapsed_seconds_this_process": 0.017,
+  "input_file": "C:\\Users\\费代强\\OneDrive\\桌面\\大创项目\\结题math\\datasets\\processed\\combined.jsonl"
+}
