@@ -7,7 +7,6 @@ from __future__ import annotations
 真实调用失败时会自动 fallback 到 mock，保证现场演示不会因为网络或 Key 问题中断。
 """
 
-import json
 import re
 from typing import Any, Dict, List, Optional
 
@@ -62,23 +61,10 @@ class LLMClient:
             raise LLMError(str(exc)) from exc
 
     def generate_feature_code(self, columns: List[str], stats: Dict[str, Any], history: List[str]) -> str:
-        """Tabular 使用：让 LLM 返回 pandas 特征生成代码。"""
-        system_prompt = "You generate short pandas feature-engineering code. Return only Python code."
-        user_prompt = (
-            "Given a pandas DataFrame named df, create one useful numeric feature column.\n"
-            "Allowed objects: df, np, pd, math. Do not import modules. Do not read files.\n"
-            f"Columns: {columns}\n"
-            f"Stats: {json.dumps(stats, ensure_ascii=False)[:3000]}\n"
-            f"Previous feedback: {history[-5:]}\n"
-            "Return code like: df['new_feature'] = ..."
-        )
-        try:
-            raw = self.chat(user_prompt, system_prompt=system_prompt, temperature=0.3)
-            return strip_code_fence(raw)
-        except LLMError:
-            if not self.use_mock_when_fails:
-                raise
-            return mock_feature_code(columns, history)
+        """保留共享客户端接口，表格专用实现位于 tabular_data。"""
+        from tabular_data.feature_generation import generate_feature_code
+
+        return generate_feature_code(self, columns, stats, history)
 
     def recover_math_node(
         self,
@@ -150,25 +136,10 @@ def strip_code_fence(text: str) -> str:
 
 
 def mock_feature_code(columns: List[str], history: List[str] | None = None) -> str:
-    """本地 mock 特征生成，按轮次生成比例、差值、交互项。"""
-    usable = [col for col in columns if col != "target"]
-    history = history or []
-    idx = max(0, len(history) - 1)
-    if len(usable) >= 2:
-        a = usable[idx % len(usable)]
-        b = usable[(idx + 1) % len(usable)]
-        if idx % 3 == 0:
-            return (
-                f"denom = df[{b!r}].replace(0, np.nan)\n"
-                f"df['llm_ratio_{a}_to_{b}_{idx}'] = (df[{a!r}] / denom).replace([np.inf, -np.inf], np.nan).fillna(0)"
-            )
-        if idx % 3 == 1:
-            return f"df['llm_diff_{a}_minus_{b}_{idx}'] = df[{a!r}] - df[{b!r}]"
-        return f"df['llm_interaction_{a}_{b}_{idx}'] = df[{a!r}] * df[{b!r}]"
-    if usable:
-        a = usable[0]
-        return f"df['llm_squared_{a}'] = df[{a!r}] * df[{a!r}]"
-    return "df['llm_constant_guard'] = 0"
+    """兼容旧导入；表格回退规则统一保存在 tabular_data。"""
+    from tabular_data.feature_generation import mock_feature_code as generate_mock
+
+    return generate_mock(columns, history)
 
 
 def mock_code_solution(prompt: str, starter_code: str) -> str:

@@ -17,10 +17,11 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from code_rewrite_feedback_expander import CodeRecord, CodeRewriteExpansionPipeline
 from code_rewrite_feedback_expander.llm import MockRewriteClient, parse_rewrite_response
-from code_rewrite_feedback_expander.models import RewriteCandidate
-from code_rewrite_feedback_expander.visualization import write_quality_svg
+from code_rewrite_feedback_expander.models import CodeRecord, RewriteCandidate
+from code_rewrite_feedback_expander.pipeline import CodeRewriteExpansionPipeline, expansion_record_to_dict
+from code_rewrite_feedback_expander.quality import UNIFIED_METRICS
+from code_rewrite_feedback_expander.visualization import write_quality_report
 from config import MAX_ITERATIONS, OUTPUT_DIR, SAMPLE_DATA_DIR
 from llm_client import LLMClient, strip_code_fence
 from result_schema import ResultRecord, append_jsonl
@@ -212,19 +213,24 @@ def run_code_rewrite_pipeline(
     pipeline = CodeRewriteExpansionPipeline(
         llm=ProjectRewriteClient(llm_client),
         max_iterations=max_iterations,
-        max_refine_iterations=3,
-        patience=2,
         accept_threshold=0.78,
     )
     expansion = pipeline.expand_record(record)
-    expansion_dict = expansion.to_dict()
+    expansion_dict = expansion_record_to_dict(expansion)
     svg_path = OUTPUT_DIR / "code_quality.svg"
-    write_quality_svg(svg_path, expansion_dict)
+    write_quality_report(str(svg_path), [expansion_dict])
 
     semantic = expansion_dict.get("semantic_result", {})
     quality = expansion_dict.get("final_quality", {})
     stats = expansion_dict.get("expansion_stats", {})
     accepted = bool(expansion_dict.get("accepted"))
+    attempt_count = len(expansion.iteration_trace)
+    round_count = max((item.get("opd_step", 0) for item in expansion.iteration_trace), default=0)
+    rejection_reason = (
+        quality.get("feedback", "质量没有提升，未保留改写。")
+        if semantic.get("passed")
+        else semantic.get("feedback", "语义检查未通过。")
+    )
     feedback = "Code rewrite 扩充通过：语义保持，且至少有一次质量提升。" if accepted else "Code rewrite 未保留：没有同时满足语义通过和质量提升。"
 
     result = ResultRecord.create(
@@ -238,8 +244,8 @@ def run_code_rewrite_pipeline(
         },
         structured_representation={
             "strategies": ["cot", "style", "ast", "variable", "control_flow"],
-            "semantic_gate": ["ast_parse", "signature_consistency", "safety", "unit_tests", "ast_similarity", "codebleu_like"],
-            "quality_dimensions": ["readability", "complexity", "length_balance", "diversity", "style"],
+            "semantic_gate": ["ast_parse", "signature_consistency", "safety", "compile_pass_rate", "unit_test_pass_rate"],
+            "quality_dimensions": list(UNIFIED_METRICS),
         },
         generated={
             "prompt": task["prompt"],
@@ -255,23 +261,24 @@ def run_code_rewrite_pipeline(
         verification={
             "passed": accepted,
             "error_type": "None" if accepted else "RewriteNotRetained",
-            "error_message": "" if accepted else semantic.get("feedback", "质量没有提升或语义检查未通过。"),
-            "attempts": stats.get("attempt_count", 0),
+            "error_message": "" if accepted else rejection_reason,
+            "attempts": attempt_count,
             "semantic_result": semantic,
+            "original_quality": expansion_dict["original_quality"],
             "quality_result": quality,
         },
         feedback=feedback,
         accepted=accepted,
-        round=int(stats.get("attempt_count", 0)),
-        errors=[] if accepted else [semantic.get("feedback", "rewrite 未通过保留条件")],
+        round=round_count,
+        errors=[] if accepted else [rejection_reason],
         metrics={
-            "quality_score": quality.get("aggregate_score"),
-            "retained_count": stats.get("retained_count", 0),
-            "attempt_count": stats.get("attempt_count", 0),
+            "quality_metrics": quality.get("metric_scores", {}),
+            "retained_count": stats.get("rewrite_count", 0),
+            "attempt_count": attempt_count,
             "reasoning_steps_before": stats.get("original_reasoning_steps", 0),
             "reasoning_steps_after": stats.get("expanded_reasoning_steps", 0),
-            "code_lines_before": stats.get("original_code_lines", 0),
-            "code_lines_after": stats.get("expanded_code_lines", 0),
+            "code_lines_before": stats.get("original_line_count", 0),
+            "code_lines_after": stats.get("expanded_line_count", 0),
         },
     )
     path = OUTPUT_DIR / "code_repair_traces.jsonl"

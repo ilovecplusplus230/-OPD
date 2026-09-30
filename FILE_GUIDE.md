@@ -15,6 +15,7 @@ Flask 后端入口。网站打开、文件上传、三个 demo 接口都从这�
 新增或整理了：
 
 - `GET /api/health`
+- `GET /api/ping`（供本地 HTML 和启动器快速识别网站）
 - `GET /api/results`
 - `POST /api/run/tabular`
 - `POST /api/run/math`
@@ -27,6 +28,14 @@ Flask 后端入口。网站打开、文件上传、三个 demo 接口都从这�
 
 前端同学如果要改图片路径、页面样式、展示区域，主要改这个文件。
 后端接口地址保持 `/api/...` 不变即可。
+
+## website_entry.js / start_website.py / 一键启动脚本
+
+`website_entry.js` 让直接打开的 `index.html` 自动连接并跳转到完整网站；服务未启动时显示操作提示并重试。通过网站地址访问时不做跳转。
+
+`start_website.py` 检查可用 Python 环境，启动独立后台进程，等待网站就绪后打开浏览器；日志在 `logs/website.log`。已有服务会直接复用。
+
+Windows 双击 `一键启动.bat`，由 `start_website_windows.ps1` 判断使用 Windows 还是项目所在的 WSL 环境；Linux 使用 `一键启动.sh`。电脑或 WSL 重启后需重新启动，浏览器不能仅靠 HTML 启动 Python。
 
 ## config.py
 
@@ -44,6 +53,8 @@ Flask 后端入口。网站打开、文件上传、三个 demo 接口都从这�
 
 Tabular、Math、Code 都通过它调用模型。真实 API 失败时会自动 fallback 到 mock，保证 demo 不崩。
 
+表格专用的提示词和回退规则已移到 `tabular_data/feature_generation.py`，此文件保留兼容调用接口。
+
 ## result_schema.py
 
 统一结果结构。三类 pipeline 都返回 `ResultRecord`，前端就不用为每种数据猜不同字段。
@@ -58,9 +69,17 @@ Tabular、Math、Code 都通过它调用模型。真实 API 失败时会自动 f
 - `accepted`
 - `metrics`
 
-## tabular_octree.py
+## tabular_data/
 
-表格 OCTree 主线。
+表格 OCTree 主线与数据集的统一目录：
+
+- `tabular_octree.py`：原根目录表格主流程，导入路径为 `tabular_data.tabular_octree`。
+- `feature_generation.py`：LLM 表格特征生成提示词及离线回退规则。
+- `web.js`：统一表格上传、模拟测试和结果展示，兼容分类与回归指标。
+- `paths.py`：表格专用数据、上传文件及输出路径，可用 `TABULAR_DATASET_DIR`、`TABULAR_UPLOAD_DIR`、`TABULAR_OUTPUT_DIR` 配置。
+- `datasets/sample_tabular.csv`：从原 `sample_data/` 移入的表格样例。
+- `uploads/`：表格上传文件，上传时自动创建。
+- `outputs/`：表格运行结果，保存时自动创建。
 
 核心流程：
 
@@ -77,9 +96,11 @@ Tabular、Math、Code 都通过它调用模型。真实 API 失败时会自动 f
 
 输出：
 
-- `outputs/tabular_results.json`
-- `outputs/tabular_augmented.csv`
-- `outputs/metrics.csv`
+- `tabular_data/outputs/tabular_results.json`
+- `tabular_data/outputs/tabular_augmented.csv`
+- `tabular_data/outputs/metrics.csv`
+
+对应的 `/outputs/...` 下载接口保持兼容。
 
 ## math_adapter.py
 
@@ -160,15 +181,14 @@ Code 数据扩充主入口。
 
 ## sample_data/
 
-本地 demo 数据。
+数学和代码的本地 demo 数据。表格样例已移至 `tabular_data/datasets/`。
 
-- `sample_tabular.csv`：表格样例
 - `sample_math.jsonl`：数学 CoT 样例
 - `sample_code.json`：代码样例，第一条会走 rewrite，第二条保留生成修复路径
 
 ## outputs/
 
-运行结果目录。答辩截图、前端展示、结题报告整理都可以从这里取结果。
+数学和代码的运行结果目录。表格结果集中在 `tabular_data/outputs/`。
 
 ## legacy/
 

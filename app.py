@@ -21,7 +21,10 @@ from llm_client import LLMClient
 from math_adapter import MATH_MODULE_AVAILABLE, math_module_status, run_math_pipeline
 from result_schema import read_json_if_exists, read_jsonl_tail
 from safe_exec import run_python_tests
-from tabular_octree import load_table_file, run_octree_analysis
+from tabular_data.feature_generation import OfflineFeatureClient
+from tabular_data.paths import OUTPUT_DIR as TABULAR_OUTPUT_DIR
+from tabular_data.paths import UPLOAD_DIR as TABULAR_UPLOAD_DIR
+from tabular_data.tabular_octree import load_table_file, run_octree_analysis
 
 
 app = Flask(__name__, static_folder=".", static_url_path="")
@@ -51,11 +54,11 @@ def safe_json(value: Any) -> Any:
     return value
 
 
-def save_upload(file_storage) -> Path:
-    """所有上传文件先落到 uploads/，再交给对应 pipeline。"""
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+def save_upload(file_storage, directory: Path = UPLOAD_DIR) -> Path:
+    """上传文件保存到对应模块的目录，再交给 pipeline。"""
+    directory.mkdir(parents=True, exist_ok=True)
     filename = Path(file_storage.filename or "upload.data").name
-    path = UPLOAD_DIR / filename
+    path = directory / filename
     file_storage.save(path)
     return path
 
@@ -70,7 +73,12 @@ def index():
 
 @app.route("/outputs/<path:filename>")
 def download_output(filename: str):
-    return send_from_directory(OUTPUT_DIR, filename, as_attachment=False)
+    directory = (
+        TABULAR_OUTPUT_DIR
+        if filename in {"tabular_results.json", "tabular_augmented.csv", "metrics.csv"}
+        else OUTPUT_DIR
+    )
+    return send_from_directory(directory, filename, as_attachment=False)
 
 
 @app.route("/api/health", methods=["GET"])
@@ -90,10 +98,18 @@ def api_health():
     )
 
 
+@app.route("/api/ping", methods=["GET"])
+def api_ping():
+    """供本地 HTML 和启动器识别网站，不重复启动代码沙盒。"""
+    response = jsonify({"service": "opd-web", "status": "ok"})
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @app.route("/api/results", methods=["GET"])
 def api_results():
-    """读取 outputs/ 下最近一次结果，给前端和队友快速查看。"""
-    tabular = read_json_if_exists(OUTPUT_DIR / "tabular_results.json")
+    """读取各模块输出目录下最近一次结果，给前端和队友快速查看。"""
+    tabular = read_json_if_exists(TABULAR_OUTPUT_DIR / "tabular_results.json")
     math_rows = read_jsonl_tail(OUTPUT_DIR / "math_expanded.jsonl", limit=5)
     code_rows = read_jsonl_tail(OUTPUT_DIR / "code_repair_traces.jsonl", limit=5)
     return jsonify(
@@ -103,13 +119,13 @@ def api_results():
                 "math": math_rows,
                 "code": code_rows,
                 "files": {
-                    "tabular_results": str(OUTPUT_DIR / "tabular_results.json"),
-                    "tabular_augmented": str(OUTPUT_DIR / "tabular_augmented.csv"),
+                    "tabular_results": str(TABULAR_OUTPUT_DIR / "tabular_results.json"),
+                    "tabular_augmented": str(TABULAR_OUTPUT_DIR / "tabular_augmented.csv"),
                     "math_expanded": str(OUTPUT_DIR / "math_expanded.jsonl"),
                     "math_quality": str(OUTPUT_DIR / "math_quality.svg"),
                     "code_repair_traces": str(OUTPUT_DIR / "code_repair_traces.jsonl"),
                     "code_quality": str(OUTPUT_DIR / "code_quality.svg"),
-                    "metrics": str(OUTPUT_DIR / "metrics.csv"),
+                    "metrics": str(TABULAR_OUTPUT_DIR / "metrics.csv"),
                 },
             }
         )
@@ -123,7 +139,7 @@ def api_upload():
         file_storage = request.files.get("file")
         if not file_storage:
             return jsonify({"success": False, "error": "请上传 CSV 或 Excel 文件。"}), 400
-        path = save_upload(file_storage)
+        path = save_upload(file_storage, directory=TABULAR_UPLOAD_DIR)
         target_col = request.form.get("target_col") or request.args.get("target_col")
         df = load_table_file(path)
         result = run_octree_analysis(df=df, target_col=target_col)
@@ -134,20 +150,13 @@ def api_upload():
 
 @app.route("/api/simulate", methods=["POST"])
 def api_simulate():
-    """保留原模拟接口，旧前端按钮仍然可用。"""
-    simulated = {
-        "success": True,
-        "message": "OCTree 模拟完成：LLM 生成候选特征，沙盒检查，模型评估，并输出自然语言反馈。",
-        "baseline": {"accuracy": 0.86, "auc": 0.91, "f1": 0.85, "log_loss": 0.34, "mse": 0.14},
-        "optimized": {"accuracy": 0.91, "auc": 0.95, "f1": 0.90, "log_loss": 0.24, "mse": 0.09},
-        "improvement": {"accuracy": 0.05, "auc": 0.04, "f1": 0.05, "log_loss": 0.10, "mse": 0.05},
-        "generated_rules": [
-            "df['feature_ratio'] = df['feature_a'] / (df['feature_b'] + 1e-6)",
-            "df['feature_interaction'] = df['feature_a'] * df['feature_c']",
-        ],
-        "history_log": ["第 1 轮接受比例特征。", "第 2 轮接受交互特征。"],
-    }
-    return jsonify(simulated)
+    """用内置表格和本地特征规则执行真实模型评估，返回完整迭代记录。"""
+    try:
+        result = run_octree_analysis(llm_client=OfflineFeatureClient())
+        result["message"] = "内置 Wine 样例测试完成：特征由本地规则生成，指标来自交叉验证。"
+        return jsonify(safe_json(result))
+    except Exception as exc:
+        return jsonify({"success": False, "error": f"表格模拟失败：{type(exc).__name__}: {exc}"}), 500
 
 
 @app.route("/api/run/tabular", methods=["POST"])
@@ -159,7 +168,7 @@ def api_run_tabular():
         if payload.get("target_col"):
             target_col = payload.get("target_col")
         if file_storage:
-            path = save_upload(file_storage)
+            path = save_upload(file_storage, directory=TABULAR_UPLOAD_DIR)
             df = load_table_file(path)
             result = run_octree_analysis(df=df, target_col=target_col)
         else:

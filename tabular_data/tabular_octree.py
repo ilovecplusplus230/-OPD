@@ -16,29 +16,25 @@ import numpy as np
 import pandas as pd
 from sklearn.base import clone
 from sklearn.datasets import load_wine
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, f1_score, log_loss, mean_squared_error, roc_auc_score
 from sklearn.model_selection import KFold, StratifiedKFold, cross_val_predict
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, export_text
+from xgboost import XGBClassifier, XGBRegressor, build_info, __version__ as XGBOOST_VERSION
+from xgboost.callback import TrainingCallback
 
-from config import MAX_ITERATIONS, OUTPUT_DIR, SAMPLE_DATA_DIR
+from config import MAX_ITERATIONS
 from llm_client import LLMClient
 from result_schema import ResultRecord, write_json
 
-try:
-    from xgboost import XGBClassifier, XGBRegressor
-except Exception:  # pragma: no cover
-    XGBClassifier = None
-    XGBRegressor = None
-
+from .paths import DATASET_DIR, OUTPUT_DIR
 
 TARGET_CANDIDATES = ["target", "label", "class", "y", "is_phishing", "phishing", "quality"]
 
 
 def get_data() -> pd.DataFrame:
-    """没有上传文件时，优先使用 sample_data/sample_tabular.csv，否则使用 sklearn wine。"""
-    sample_path = SAMPLE_DATA_DIR / "sample_tabular.csv"
+    """没有上传文件时，优先使用本模块 datasets/sample_tabular.csv，否则使用 sklearn wine。"""
+    sample_path = DATASET_DIR / "sample_tabular.csv"
     if sample_path.exists():
         return pd.read_csv(sample_path)
     data = load_wine(as_frame=True)
@@ -183,24 +179,36 @@ def check_feature_robustness(df: pd.DataFrame, feature_code: str) -> Tuple[bool,
     return True, safe_df, f"通过沙盒检查，新增列：{', '.join(map(str, new_columns))}", new_columns
 
 
+class _RequireCudaTraining(TrainingCallback):
+    """拒绝 XGBoost 在 GPU 不可见时自动切换成 CPU 的训练结果。"""
+
+    def after_training(self, model):
+        device = json.loads(model.save_config())["learner"]["generic_param"]["device"]
+        if not device.startswith("cuda"):
+            raise RuntimeError("XGBoost 未在 GPU 上训练，请检查 CUDA 12 安装包和显卡可见性。")
+        return model
+
+
 def _classification_model(n_classes: int):
-    if XGBClassifier is not None:
-        return XGBClassifier(
-            n_estimators=60,
-            max_depth=3,
-            learning_rate=0.08,
-            subsample=0.9,
-            colsample_bytree=0.9,
-            eval_metric="mlogloss" if n_classes > 2 else "logloss",
-            random_state=42,
-        )
-    return RandomForestClassifier(n_estimators=80, random_state=42)
+    return XGBClassifier(
+        n_estimators=60,
+        max_depth=3,
+        learning_rate=0.08,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        eval_metric="mlogloss" if n_classes > 2 else "logloss",
+        random_state=42,
+        device="cuda:0",
+        tree_method="hist",
+        callbacks=[_RequireCudaTraining()],
+    )
 
 
 def _regression_model():
-    if XGBRegressor is not None:
-        return XGBRegressor(n_estimators=60, max_depth=3, learning_rate=0.08, random_state=42)
-    return RandomForestRegressor(n_estimators=80, random_state=42)
+    return XGBRegressor(
+        n_estimators=60, max_depth=3, learning_rate=0.08, random_state=42,
+        device="cuda:0", tree_method="hist", callbacks=[_RequireCudaTraining()],
+    )
 
 
 def _safe_auc(y_true: np.ndarray, proba: np.ndarray) -> Optional[float]:
@@ -220,24 +228,36 @@ def _safe_log_loss(y_true: np.ndarray, proba: np.ndarray) -> Optional[float]:
         return None
 
 
-def evaluate_and_reason(df: pd.DataFrame, task_type: Optional[str] = None) -> Dict[str, Any]:
+def evaluate_and_reason(
+    df: pd.DataFrame,
+    task_type: Optional[str] = None,
+    model_backend: Optional[str] = None,
+) -> Dict[str, Any]:
     """五折交叉验证评估当前特征集合，并导出 CART 规则作为自然语言反馈基础。"""
     X = df.drop(columns=["target"])
     y = df["target"].to_numpy()
     if task_type is None:
         task_type = "classification" if len(np.unique(y)) <= max(20, int(math.sqrt(max(len(y), 1)))) else "regression"
 
-    if task_type == "classification":
+    is_classification = task_type == "classification"
+    backend = model_backend or "xgboost"
+    if backend != "xgboost":
+        raise ValueError(f"未知评估模型：{backend}")
+
+    if is_classification:
         n_classes = len(np.unique(y))
         min_count = int(pd.Series(y).value_counts().min())
         folds = max(2, min(5, min_count))
         cv = StratifiedKFold(n_splits=folds, shuffle=True, random_state=42)
         model = _classification_model(n_classes)
-        pred = cross_val_predict(clone(model), X, y, cv=cv, method="predict")
-        try:
-            proba = cross_val_predict(clone(model), X, y, cv=cv, method="predict_proba")
-        except Exception:
-            proba = np.eye(n_classes)[pred]
+    else:
+        folds = max(2, min(5, len(df)))
+        cv = KFold(n_splits=folds, shuffle=True, random_state=42)
+        model = _regression_model()
+
+    pred = cross_val_predict(clone(model), X, y, cv=cv, method="predict")
+    if is_classification:
+        proba = cross_val_predict(clone(model), X, y, cv=cv, method="predict_proba")
         metrics = {
             "accuracy": float(accuracy_score(y, pred)),
             "auc": _safe_auc(y, proba),
@@ -248,10 +268,6 @@ def evaluate_and_reason(df: pd.DataFrame, task_type: Optional[str] = None) -> Di
         tree = DecisionTreeClassifier(max_depth=3, random_state=42)
         tree.fit(X, y)
     else:
-        folds = max(2, min(5, len(df)))
-        cv = KFold(n_splits=folds, shuffle=True, random_state=42)
-        model = _regression_model()
-        pred = cross_val_predict(clone(model), X, y, cv=cv)
         metrics = {
             "accuracy": None,
             "auc": None,
@@ -266,7 +282,10 @@ def evaluate_and_reason(df: pd.DataFrame, task_type: Optional[str] = None) -> Di
         cart_rules = export_text(tree, feature_names=list(X.columns))
     except Exception:
         cart_rules = "决策树规则导出失败。"
-    return {"metrics": metrics, "cart_rules": cart_rules, "feature_names": list(X.columns)}
+    return {
+        "metrics": metrics, "cart_rules": cart_rules, "feature_names": list(X.columns),
+        "model_backend": backend, "device": "cuda:0",
+    }
 
 
 def _metric_improvement(baseline: Dict[str, Any], optimized: Dict[str, Any]) -> Dict[str, Any]:
@@ -323,6 +342,12 @@ def run_octree_analysis(
     task_type = metadata.get("task_type", "classification")
 
     baseline_report = evaluate_and_reason(processed, task_type=task_type)
+    model_backend = baseline_report["model_backend"]
+    model_info = {
+        "backend": model_backend, "device": baseline_report["device"],
+        "xgboost_version": XGBOOST_VERSION,
+        "cuda_version": ".".join(map(str, build_info().get("CUDA_VERSION", []))),
+    }
     baseline_metrics = baseline_report["metrics"]
     current_df = processed.copy()
     best_metrics = baseline_metrics.copy()
@@ -332,6 +357,7 @@ def run_octree_analysis(
     generated_rules: List[str] = []
 
     for round_idx in range(1, max_iterations + 1):
+        metrics_before = best_metrics.copy()
         strategy = get_strategy(history_log, baseline_metrics)
         feature_code = ask_llm_for_feature(llm_client, current_df, metadata, history_log)
         generated_rules.append(feature_code)
@@ -340,7 +366,7 @@ def run_octree_analysis(
         candidate_metrics: Dict[str, Any] = best_metrics.copy()
         cart_feedback = sandbox_reason
         if valid:
-            candidate_report = evaluate_and_reason(candidate_df, task_type=task_type)
+            candidate_report = evaluate_and_reason(candidate_df, task_type=task_type, model_backend=model_backend)
             candidate_metrics = candidate_report["metrics"]
             accepted = _is_better(best_metrics, candidate_metrics, task_type)
             cart_feedback = f"{sandbox_reason}\n决策树反馈：\n{candidate_report['cart_rules'][:1200]}"
@@ -357,17 +383,20 @@ def run_octree_analysis(
         iterations.append(
             {
                 "round": round_idx,
+                "model_backend": model_backend,
                 "feature_code": feature_code,
                 "new_columns": new_cols,
                 "valid": valid,
                 "accepted": accepted,
                 "reason": sandbox_reason,
                 "metrics": candidate_metrics,
+                "metrics_before": metrics_before,
+                "metrics_after": best_metrics.copy(),
                 "feedback": cart_feedback,
             }
         )
 
-    optimized_report = evaluate_and_reason(current_df, task_type=task_type)
+    optimized_report = evaluate_and_reason(current_df, task_type=task_type, model_backend=model_backend)
     optimized_metrics = optimized_report["metrics"]
     improvement = _metric_improvement(baseline_metrics, optimized_metrics)
     accepted = len(accepted_features) > 0
@@ -392,6 +421,7 @@ def run_octree_analysis(
             "iterations": iterations,
         },
         verification={
+            "model": model_info,
             "baseline": baseline_metrics,
             "optimized": optimized_metrics,
             "improvement": improvement,
@@ -404,6 +434,8 @@ def run_octree_analysis(
 
     result = {
         "success": True,
+        "model": model_info,
+        "message": f"分析完成：共评估 {len(iterations)} 轮，保留 {len(accepted_features)} 个新特征。",
         "baseline": baseline_metrics,
         "optimized": optimized_metrics,
         "improvement": improvement,

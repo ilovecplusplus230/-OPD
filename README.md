@@ -11,6 +11,8 @@ Math：扩充数学 CoT 的中间推理步骤。流程是切分原始解答，�
 
 Code：现在支持两种模式。没有原始代码时，走“生成代码 -> 跑测试 -> 错误反馈 -> 修复”；有原始 code 和 reasoning 时，走队友的 rewrite 扩充流程，同步改写 reasoning 和 code，并做语义等价检查和质量评分。
 
+表格专用代码与数据集集中在 `tabular_data/`：主流程为 `tabular_data/tabular_octree.py`，特征生成逻辑为 `tabular_data/feature_generation.py`，样例数据为 `tabular_data/datasets/sample_tabular.csv`。表格上传文件和分析结果分别保存到该目录的 `uploads/`、`outputs/`，详见 [表格模块说明](tabular_data/README.md)。
+
 ## 安装依赖
 
 在 VSCode 终端进入本目录：
@@ -21,22 +23,15 @@ python -m pip install -r requirements.txt
 
 ## 启动网站
 
-```powershell
-python app.py
-```
+Windows 用户在项目文件夹中双击 **`一键启动.bat`**。它会启动后台服务并自动打开 [完整网站](http://127.0.0.1:5000/)，关闭启动窗口不会停止服务。项目位于 `\\wsl.localhost\发行版\...` 或 `\\wsl$\发行版\...` 时，会自动使用对应 WSL 环境，无需另装一份 Windows 依赖。
 
-看到下面类似输出就说明后端已经启动：
+之后直接双击 **`index.html`** 即可：本地 HTML 会检测服务并自动进入完整网站，Tabular 上传与模拟测试、Math、Code 和一键 Demo 都从网站调用后端。也可以直接收藏上面的地址。
 
-```text
-OCTree Flask backend is running.
-Open http://127.0.0.1:5000 in your browser.
-```
+电脑或 WSL 重启后需要再次双击 `一键启动.bat`。浏览器无法自行启动 Python；若服务尚未启动，本地 HTML 会显示启动提示并持续重试，服务就绪后自动进入。若浏览器拦截本地连接检测，点击提示中的“进入完整网站”。
 
-然后浏览器打开：
+Linux 用户可运行 `./一键启动.sh`。启动器会查找当前 Python、项目虚拟环境及本机 `llm_reviewer` Conda 环境；本机已有可用依赖。其他机器需先完成上面的依赖安装。可以用 `OPD_PYTHON` 指定已有 Python 环境。
 
-```text
-http://127.0.0.1:5000
-```
+启动日志位于 `logs/website.log`，后台进程编号记录在 `logs/website.pid`。重复点击启动脚本会复用已有服务。只启动后台、不打开浏览器时可使用 `python3 start_website.py --no-browser`。需要在终端查看实时日志或用 `Ctrl+C` 停止时，仍可用已装依赖的 Python 执行 `python app.py`（需先停止已有后台服务）。
 
 ## 前后端关系
 
@@ -57,13 +52,15 @@ http://127.0.0.1:5000
 
 运行 demo 后会生成：
 
-- `outputs/tabular_results.json`：表格特征扩充结果
-- `outputs/tabular_augmented.csv`：增强后的表格
-- `outputs/metrics.csv`：baseline / optimized / improvement 指标
+- `tabular_data/outputs/tabular_results.json`：表格特征扩充结果
+- `tabular_data/outputs/tabular_augmented.csv`：增强后的表格
+- `tabular_data/outputs/metrics.csv`：baseline / optimized / improvement 指标
 - `outputs/math_expanded.jsonl`：数学推理链扩充结果
 - `outputs/math_quality.svg`：数学质量图
 - `outputs/code_repair_traces.jsonl`：代码生成、修复或 rewrite 扩充轨迹
 - `outputs/code_quality.svg`：代码 rewrite 质量对比图
+
+表格文件的原有下载地址 `/outputs/tabular_results.json`、`/outputs/tabular_augmented.csv` 和 `/outputs/metrics.csv` 保持可用。
 
 ## Code 新增 rewrite 流程
 

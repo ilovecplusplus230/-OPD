@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OCTree | 面向生成式模型的高质量数据扩充技术</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="website_entry.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <script id="chartLibrary" async src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary-blue: #f0f4f8;
@@ -997,16 +998,6 @@
 </div>
 
 
-<div class="fullscreen-sim-modal" id="fullscreenSimModal">
-    <div class="fullscreen-sim-content">
-        <div class="fullscreen-sim-header">
-            <h3><i class="fas fa-terminal"></i> 模拟运行</h3>
-            <button class="fullscreen-sim-close" id="closeFullscreenBtn"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="fullscreen-sim-console" id="fullscreenConsole"></div>
-    </div>
-</div>
-
 <div class="main-container" id="mainContainer">
     <section class="content-section" id="overview">
         <div class="hero-content">
@@ -1068,7 +1059,7 @@
         <div class="integrated-simulator">
             <div class="simulator-header">
                 <h2><i class="fas fa-sitemap"></i> 核心模拟与数据集演示</h2>
-                <p>选择数据集，点击流程步骤，体验基于LLM与决策树反馈的多指标迭代优化</p>
+                <p>卡片展示预置示意数据；模拟测试使用内置 Wine 样例，执行实际模型评估</p>
             </div>
             <div class="simulator-main">
                 <div class="left-panel">
@@ -1094,10 +1085,10 @@
                         </div>
                         <div class="metric-card">
                             <div class="metric-value" id="metric-rules">6</div>
-                            <div class="metric-label">生成规则数量</div>
+                            <div class="metric-label">保留的新特征</div>
                         </div>
                     </div>
-                    <button class="run-button" id="runSimulateBtn">运行完整模拟</button>
+                    <button class="run-button" id="runSimulateBtn">运行表格模拟测试</button>
                     <div id="datasetReport" class="dataset-report"></div>
                     <button class="schematic-btn" id="openSchematicBtn"><i class="fas fa-project-diagram"></i> 流程示意图</button>
                 </div>
@@ -1106,8 +1097,8 @@
     </section>
 
     <section class="content-section" id="performance">
-        <h2 class="section-title">真实数据集性能提升对比</h2>
-        <p class="section-subtitle">基于Robust-OCTree v2.0算法在多个公开数据集上的测试结果</p>
+        <h2 class="section-title">流程示意指标对比</h2>
+        <p class="section-subtitle">以下为预置示意数值；本次运行结果请查看模拟测试或上传后的分析报告</p>
         <div class="metric-tabs">
             <div class="metric-tab active" data-metric="f1"><i class="fas fa-chart-bar"></i> F1-Score</div>
             <div class="metric-tab" data-metric="mse"><i class="fas fa-chart-line"></i> MSE 损失</div>
@@ -1210,135 +1201,6 @@
     let currentMetric = "f1";
     let currentDataset = "white_wine";
     let barChart = null, iterChart = null;
-    let simulationInterval = null;
-    let fullscreenSimulationInterval = null;
-
-
-    function getSimulationStepsForDataset(datasetKey) {
-        const d = metricsData[datasetKey];
-
-        if (datasetKey === 'white_wine') {
-            return [
-                { iter: 1, rule: "df['alcohol_volatile_ratio'] = df['alcohol'] / (df['volatile_acidity'] + 0.01)", desc: "酒精与挥发酸比值", f1_before: 0.685, f1_after: 0.685, mse_before: 0.142, mse_after: 0.142, improved: false, reason: "【沙盒拦截】规则生成的新特征方差过小，缺乏区分度，数学体检未通过" },
-                { iter: 2, rule: "df['sulfur_ratio'] = df['free_sulfur_dioxide'] / (df['total_sulfur_dioxide'] + 0.01)", desc: "游离二氧化硫与总二氧化硫比率", f1_before: 0.685, f1_after: 0.712, mse_before: 0.142, mse_after: 0.128, improved: true, reason: "【边界优化】AUC平稳，F1提升3.9%，MSE降低9.9%，改善了不平衡分类的少数类截断边界" },
-                { iter: 3, rule: "df['ph_chloride_interaction'] = df['pH'] * np.log(df['chlorides'] + 1)", desc: "pH值与氯化物对数交互", f1_before: 0.712, f1_after: 0.712, mse_before: 0.128, mse_after: 0.128, improved: false, reason: "【结构冗余】各项指标波动极微，该公式产生的非线性逻辑已被树模型隐式分裂提前捕获" },
-                { iter: 4, rule: "df['sulphate_alcohol_product'] = df['sulphates'] * df['alcohol']", desc: "硫酸盐与酒精含量乘积", f1_before: 0.712, f1_after: 0.723, mse_before: 0.128, mse_after: 0.116, improved: true, reason: "【置信度增强】F1提升1.5%，Log-Loss改善8.2%，模型概率预测更加笃定" },
-                { iter: 5, rule: "df['density_residual_sugar_ratio'] = df['density'] / (df['residual_sugar'] + 0.01)", desc: "密度与残糖比值", f1_before: 0.723, f1_after: 0.723, mse_before: 0.116, mse_after: 0.116, improved: false, reason: "【沙盒拦截】特征分布存在异常值，包含无穷大值，数学体检未通过" },
-                { iter: 6, rule: "df['comprehensive_quality'] = (df['alcohol'] - df['volatile_acidity']) / (df['sulphates'] + 1)", desc: "综合品质评分", f1_before: 0.723, f1_after: 0.734, mse_before: 0.116, mse_after: 0.109, improved: true, reason: "【全面提升】AUC提升2.0%，F1提升1.5%，MSE降低6.0%，规则有效，已合入特征池" }
-            ];
-        } else if (datasetKey === 'bank') {
-            return [
-                { iter: 1, rule: "df['balance_duration_ratio'] = df['balance'] / (df['duration'] + 0.01)", desc: "存款余额与通话时长比值", f1_before: 0.685, f1_after: 0.685, mse_before: 0.142, mse_after: 0.142, improved: false, reason: "【沙盒拦截】规则生成的新特征方差过小，缺乏区分度，数学体检未通过" },
-                { iter: 2, rule: "df['age_pdays_log'] = df['age'] * np.log(df['pdays'] + 1)", desc: "年龄与上次联系天数对数乘积", f1_before: 0.685, f1_after: 0.712, mse_before: 0.142, mse_after: 0.128, improved: true, reason: "【边界优化】F1提升3.9%，MSE降低9.9%，改善了客户分层边界的识别能力" },
-                { iter: 3, rule: "df['campaign_previous_ratio'] = df['campaign'] / (df['previous'] + 0.01)", desc: "本次营销次数与历史次数比值", f1_before: 0.712, f1_after: 0.712, mse_before: 0.128, mse_after: 0.128, improved: false, reason: "【结构冗余】该特征与现有特征高度相关，未提供额外信息增益" },
-                { iter: 4, rule: "df['balance_age_interaction'] = df['balance'] * df['age']", desc: "存款余额与年龄乘积", f1_before: 0.712, f1_after: 0.723, mse_before: 0.128, mse_after: 0.116, improved: true, reason: "【置信度增强】F1提升1.5%，模型对高净值客户的预测更加准确" },
-                { iter: 5, rule: "df['duration_campaign_ratio'] = df['duration'] / (df['campaign'] + 0.01)", desc: "通话时长与营销次数比值", f1_before: 0.723, f1_after: 0.723, mse_before: 0.116, mse_after: 0.116, improved: false, reason: "【沙盒拦截】特征分布存在异常值，数学体检未通过" },
-                { iter: 6, rule: "df['comprehensive_risk_score'] = (df['balance'] - df['campaign']) / (df['duration'] + 1)", desc: "综合风险评分", f1_before: 0.723, f1_after: 0.734, mse_before: 0.116, mse_after: 0.109, improved: true, reason: "【全面提升】各项指标均有改善，规则有效，已合入特征池" }
-            ];
-        } else if (datasetKey === 'phishing') {
-            return [
-                { iter: 1, rule: "df['url_at_symbol_interaction'] = df['URL_Length'] * df['having_At_Symbol']", desc: "URL长度与@符号存在性交互", f1_before: 0.685, f1_after: 0.685, mse_before: 0.142, mse_after: 0.142, improved: false, reason: "【沙盒拦截】规则生成的新特征方差过小，缺乏区分度" },
-                { iter: 2, rule: "df['redirect_ssl_ratio'] = df['Redirect'] / (df['SSLfinal_State'] + 0.01)", desc: "重定向次数与SSL状态比值", f1_before: 0.685, f1_after: 0.712, mse_before: 0.142, mse_after: 0.128, improved: true, reason: "【边界优化】F1提升3.9%，改善了钓鱼网站的检测边界" },
-                { iter: 3, rule: "df['url_anchor_ratio'] = df['URL_Length'] / (df['anchor_URL'] + 0.01)", desc: "URL长度与锚点URL比值", f1_before: 0.712, f1_after: 0.712, mse_before: 0.128, mse_after: 0.128, improved: false, reason: "【结构冗余】该特征与现有特征高度相关" },
-                { iter: 4, rule: "df['request_popup_interaction'] = df['Request_URL'] * df['popUpWidnow']", desc: "请求URL与弹出窗口数量乘积", f1_before: 0.712, f1_after: 0.723, mse_before: 0.128, mse_after: 0.116, improved: true, reason: "【置信度增强】F1提升1.5%，模型对恶意网站的识别更加准确" },
-                { iter: 5, rule: "df['ssl_redirect_product'] = df['SSLfinal_State'] * df['Redirect']", desc: "SSL状态与重定向次数乘积", f1_before: 0.723, f1_after: 0.723, mse_before: 0.116, mse_after: 0.116, improved: false, reason: "【沙盒拦截】特征存在异常值，数学体检未通过" },
-                { iter: 6, rule: "df['comprehensive_security_score'] = (df['URL_Length'] - df['Redirect']) / (df['SSLfinal_State'] + 1)", desc: "综合安全评分", f1_before: 0.723, f1_after: 0.734, mse_before: 0.116, mse_after: 0.109, improved: true, reason: "【全面提升】规则有效，已合入特征池" }
-            ];
-        } else if (datasetKey === 'biodeg') {
-            return [
-                { iter: 1, rule: "df['v1_v2_ratio'] = df['V1'] / (df['V2'] + 0.01)", desc: "分子描述符V1与V2比值", f1_before: 0.685, f1_after: 0.685, mse_before: 0.142, mse_after: 0.142, improved: false, reason: "【沙盒拦截】规则生成的新特征方差过小，缺乏区分度" },
-                { iter: 2, rule: "df['v4_log_product'] = np.log(df['V4'] + 1) * df['V5']", desc: "V4对数与V5乘积", f1_before: 0.685, f1_after: 0.712, mse_before: 0.142, mse_after: 0.128, improved: true, reason: "【边界优化】F1提升3.9%，改善了生物降解性的预测边界" },
-                { iter: 3, rule: "df['v6_v7_ratio'] = df['V6'] / (df['V7'] + 0.01)", desc: "V6与V7比值", f1_before: 0.712, f1_after: 0.712, mse_before: 0.128, mse_after: 0.128, improved: false, reason: "【结构冗余】该特征与现有特征高度相关" },
-                { iter: 4, rule: "df['v8_v9_interaction'] = df['V8'] * df['V9']", desc: "V8与V9乘积交互", f1_before: 0.712, f1_after: 0.723, mse_before: 0.128, mse_after: 0.116, improved: true, reason: "【置信度增强】F1提升1.5%，模型对分子结构的理解更加深入" },
-                { iter: 5, rule: "df['v10_log_transform'] = np.log(df['V10'] + 1)", desc: "V10对数变换", f1_before: 0.723, f1_after: 0.723, mse_before: 0.116, mse_after: 0.116, improved: false, reason: "【沙盒拦截】特征存在异常值，数学体检未通过" },
-                { iter: 6, rule: "df['comprehensive_biodeg_score'] = (df['V1'] - df['V2']) / (df['V4'] + 1)", desc: "综合生物降解评分", f1_before: 0.723, f1_after: 0.734, mse_before: 0.116, mse_after: 0.109, improved: true, reason: "【全面提升】规则有效，已合入特征池" }
-            ];
-        }
-        return [];
-    }
-
-    let currentSimulationSteps = [];
-    let currentSimStep = 0;
-    let fullscreenCurrentStep = 0;
-    let fullscreenLog = "";
-
-    function updateSimulationSteps() {
-        currentSimulationSteps = getSimulationStepsForDataset(currentDataset);
-    }
-
-    function activateSimulationStep() {
-        if (currentSimStep >= currentSimulationSteps.length) {
-            if (simulationInterval) clearInterval(simulationInterval);
-            document.getElementById('console').innerHTML += "\n\n> ========== 模拟完成 (v2.0) ==========\n> OCTree经过6轮迭代，F1显著提升，MSE明显降低\n> 动态三维诊断系统共识别多次有效优化\n> 最终生成高质量特征，可导出Excel用于下游建模";
-            return;
-        }
-        const step = currentSimulationSteps[currentSimStep];
-
-        const statusIcon = step.improved ? "✓ 性能提升" : "✗ 性能未提升";
-        const logMsg = `\n> ========== 第 ${step.iter} 轮迭代 ==========\n> 生成规则: ${step.desc}\n> 数学表达式: ${step.rule}\n> 五折交叉验证结果: F1 ${step.f1_before.toFixed(3)} → ${step.f1_after.toFixed(3)} | MSE ${step.mse_before.toFixed(3)} → ${step.mse_after.toFixed(3)}\n> 动态诊断: ${statusIcon}\n> 诊断报告: ${step.reason}`;
-
-        const consoleDiv = document.getElementById('console');
-        consoleDiv.innerHTML += logMsg;
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-
-        document.getElementById('metric-iter').textContent = step.iter;
-        document.getElementById('metric-rules').textContent = step.iter === 6 ? 24 : (step.iter >= 2 ? 6 : 0);
-
-        currentSimStep++;
-    }
-
-    function activateFullscreenStep() {
-        if (fullscreenCurrentStep >= currentSimulationSteps.length) {
-            if (fullscreenSimulationInterval) clearInterval(fullscreenSimulationInterval);
-            const finalMsg = "\n\n> ========== 模拟完成 (v2.0) ==========\n> OCTree经过6轮迭代，F1显著提升，MSE明显降低\n> 动态三维诊断系统共识别多次有效优化\n> 最终生成高质量特征，可导出Excel用于下游建模";
-            fullscreenLog += finalMsg;
-            const fullscreenConsole = document.getElementById('fullscreenConsole');
-            if (fullscreenConsole) fullscreenConsole.innerHTML = fullscreenLog;
-            return;
-        }
-        const step = currentSimulationSteps[fullscreenCurrentStep];
-        const statusIcon = step.improved ? "✓ 性能提升" : "✗ 性能未提升";
-        const logMsg = `\n> ========== 第 ${step.iter} 轮迭代 ==========\n> 生成规则: ${step.desc}\n> 数学表达式: ${step.rule}\n> 五折交叉验证结果: F1 ${step.f1_before.toFixed(3)} → ${step.f1_after.toFixed(3)} | MSE ${step.mse_before.toFixed(3)} → ${step.mse_after.toFixed(3)}\n> 动态诊断: ${statusIcon}\n> 诊断报告: ${step.reason}`;
-        fullscreenLog += logMsg;
-        const fullscreenConsole = document.getElementById('fullscreenConsole');
-        if (fullscreenConsole) {
-            fullscreenConsole.innerHTML = fullscreenLog;
-            fullscreenConsole.scrollTop = fullscreenConsole.scrollHeight;
-        }
-        fullscreenCurrentStep++;
-    }
-
-    function runFullscreenSimulation() {
-        if (fullscreenSimulationInterval) clearInterval(fullscreenSimulationInterval);
-        fullscreenCurrentStep = 0;
-        fullscreenLog = "> OCTree v2.0 模拟器开始运行...\n> 启用五折交叉验证 | 动态三维诊断系统已激活\n> 正在进行迭代式特征优化生成\n";
-        const fullscreenConsole = document.getElementById('fullscreenConsole');
-        if (fullscreenConsole) fullscreenConsole.innerHTML = fullscreenLog;
-        fullscreenSimulationInterval = setInterval(activateFullscreenStep, 1800);
-    }
-
-    function runSimulation() {
-        if (simulationInterval) clearInterval(simulationInterval);
-        currentSimStep = 0;
-        updateSimulationSteps();
-        document.getElementById('console').innerHTML = "> OCTree v2.0 模拟器开始运行...\n> 启用五折交叉验证 | 动态三维诊断系统已激活\n> 正在进行迭代式特征优化生成\n";
-        simulationInterval = setInterval(activateSimulationStep, 1800);
-
-        const modal = document.getElementById('fullscreenSimModal');
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        runFullscreenSimulation();
-    }
-
-    function closeFullscreenModal() {
-        const modal = document.getElementById('fullscreenSimModal');
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto';
-        if (fullscreenSimulationInterval) clearInterval(fullscreenSimulationInterval);
-        fullscreenCurrentStep = 0;
-        fullscreenLog = "";
-    }
-
     function openSchematicModal() {
         document.getElementById('schematicModal').classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1350,7 +1212,7 @@
 
     function updateBarChart() {
         const ctx = document.getElementById('datasetBarChart');
-        if(!ctx) return;
+        if(!ctx || typeof Chart !== 'function') return;
         const labels = ['白葡萄酒品质', '银行营销', '钓鱼网站', '生物降解'];
         const dsList = ['white_wine', 'bank', 'phishing', 'biodeg'];
         const baselineData = dsList.map(ds => metricsData[ds].baseline[currentMetric]);
@@ -1367,7 +1229,7 @@
 
     function updateLineChart() {
         const ctx = document.getElementById('iterLineChart');
-        if(!ctx) return;
+        if(!ctx || typeof Chart !== 'function') return;
         const data = metricsData[currentDataset][`iter_${currentMetric}`];
         const metricNames = { f1: 'F1-Score', mse: 'MSE 损失' };
         if(iterChart) iterChart.destroy();
@@ -1398,25 +1260,23 @@
                 currentDataset = card.getAttribute('data-dataset');
                 updateLineChart();
                 updateSimulatorFromDataset();
-                updateSimulationSteps();
             };
         });
     }
 
     function updateSimulatorFromDataset() {
         const d = metricsData[currentDataset];
-        document.getElementById('metric-iter').textContent = "4";
+        document.getElementById('metric-iter').textContent = d.iter_f1.length - 1;
         document.getElementById('metric-rules').textContent = d.rules.length;
         const reportDiv = document.getElementById('datasetReport');
         const rulesHtml = d.rules.map(r => `
             <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,102,204,0.1);">
                 <div style="font-weight: 600; color: var(--text-dark);">${r.desc}</div>
                 <div style="font-family: monospace; font-size: 0.7rem; color: var(--accent-cyan); background: rgba(0,102,204,0.08); padding: 4px 8px; border-radius: 6px; margin-top: 4px;">${r.formula}</div>
-                <div style="font-size: 0.7rem; color: var(--text-gray); margin-top: 4px;">F1提升 ${r.f1_gain}% | MSE降低 ${r.mse_reduction}%</div>
             </div>
         `).join('');
         reportDiv.innerHTML = `
-            <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px;">${d.name} 数据集分析报告 (v2.0)</div>
+            <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px;">${d.name} 示意报告</div>
             <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
                 <div style="background:white; padding:8px; border-radius:12px; text-align:center;"><div style="font-size:0.7rem;">F1提升</div><div style="font-size:1.2rem; font-weight:700; color:var(--accent-purple);">+${d.improvement.f1}%</div><div>${d.baseline.f1.toFixed(3)}→${d.final.f1.toFixed(3)}</div></div>
                 <div style="background:white; padding:8px; border-radius:12px; text-align:center;"><div style="font-size:0.7rem;">MSE降低</div><div style="font-size:1.2rem; font-weight:700; color:#28a745;">${Math.abs(d.improvement.mse)}%</div><div>${d.baseline.mse.toFixed(3)}→${d.final.mse.toFixed(3)}</div></div>
@@ -1427,8 +1287,14 @@
             <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(0,102,204,0.2); font-size:0.7rem;">✨ 动态三维诊断：F1 ${d.baseline.f1.toFixed(3)} → ${d.final.f1.toFixed(3)}，总提升 +${d.improvement.f1}%</div>
         `;
         reportDiv.classList.add('active');
-        document.getElementById('console').innerHTML = `> OCTree v2.0 分析报告 - ${d.name}\n> F1: ${d.baseline.f1.toFixed(3)} → ${d.final.f1.toFixed(3)} (+${d.improvement.f1}%)\n> MSE: ${d.baseline.mse.toFixed(3)} → ${d.final.mse.toFixed(3)} (${d.improvement.mse}%)\n> 五折交叉验证结果稳定，无过拟合迹象\n> 动态诊断：该数据集特征优化效果显著，推荐用于下游建模`;
+        document.getElementById('console').innerHTML = `> 预置示意报告 - ${d.name}\n> F1: ${d.baseline.f1.toFixed(3)} → ${d.final.f1.toFixed(3)} (+${d.improvement.f1}%)\n> MSE: ${d.baseline.mse.toFixed(3)} → ${d.final.mse.toFixed(3)} (${d.improvement.mse}%)\n> 以上为预置示意数值。点击“运行表格模拟测试”查看内置样例的实际评估结果。`;
     }
+
+    document.getElementById('chartLibrary').addEventListener('load', function() {
+        updateBarChart();
+        updateLineChart();
+        if (window.TabularUI) window.TabularUI.refreshChart();
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
     // ========== 原有初始化函数调用 ==========
@@ -1436,7 +1302,6 @@
     updateLineChart();
     updateSummaryCards();
     updateSimulatorFromDataset();
-    updateSimulationSteps();
 
     // ========== 原有按钮和事件绑定 ==========
     document.getElementById('enterButton').onclick = () => {
@@ -1466,15 +1331,12 @@
         else document.getElementById('fixedNav').classList.remove('scrolled');
     });
 
-    const runBtn = document.getElementById('runSimulateBtn');
-    if (runBtn) runBtn.onclick = runSimulation;
 
     document.querySelectorAll('.dataset-mini-card').forEach(card => {
         card.onclick = () => {
             currentDataset = card.getAttribute('data-dataset');
             updateSimulatorFromDataset();
             updateLineChart();
-            updateSimulationSteps();
             document.querySelectorAll('.dataset-mini-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
         };
@@ -1499,380 +1361,16 @@
         if(e.target === this) closeSchematicModal();
     };
 
-    const closeFullscreenBtn = document.getElementById('closeFullscreenBtn');
-    if (closeFullscreenBtn) closeFullscreenBtn.onclick = closeFullscreenModal;
-
-    const fullscreenModal = document.getElementById('fullscreenSimModal');
-    if (fullscreenModal) {
-        fullscreenModal.onclick = function(e) {
-            if(e.target === this) closeFullscreenModal();
-        };
-    }
-
-    // ==========================================
-    // 新增：文件上传和OCTree分析功能（带加载动画）
-    // ==========================================
-
-    // 添加加载动画样式
-    if (!document.getElementById('upload-loading-style')) {
-        const loadingStyle = document.createElement('style');
-        loadingStyle.id = 'upload-loading-style';
-        loadingStyle.textContent = `
-            .upload-button.loading {
-                opacity: 0.7;
-                pointer-events: none;
-            }
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(loadingStyle);
-    }
-
-    // 获取元素
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadDataBtn');
-    const consoleDiv = document.getElementById('console');
-    const medicalOption = document.getElementById('medicalOption');
-    const generalOption = document.getElementById('generalOption');
-
-    let loadingInterval = null;
-
-    function startLoadingAnimation() {
-        if (!uploadBtn) return;
-        uploadBtn.classList.add('loading');
-        let dots = 0;
-        let originalText = uploadBtn.innerHTML;
-        loadingInterval = setInterval(() => {
-            if (uploadBtn) {
-                dots = (dots + 1) % 4;
-                uploadBtn.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> 分析中${'.'.repeat(dots)}`;
-            }
-        }, 500);
-    }
-
-    function stopLoadingAnimation() {
-        if (loadingInterval) clearInterval(loadingInterval);
-        if (uploadBtn) {
-            uploadBtn.classList.remove('loading');
-            uploadBtn.innerHTML = `<i class="fas fa-upload"></i> 选择文件并上传`;
-        }
-    }
-
-    function updateConsole(text, isError = false) {
-        if (!consoleDiv) return;
-        let prefix = isError ? '❌ ' : '> ';
-        if (text.startsWith('===') || text.startsWith('---')) prefix = '';
-        consoleDiv.innerHTML += `${prefix}${text}\n`;
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
-
-    function clearConsole() {
-        if (consoleDiv) consoleDiv.innerHTML = '';
-    }
-
-    function displayResults(result) {
-        if (!consoleDiv) return;
-        clearConsole();
-
-        updateConsole(`┌${'─'.repeat(58)}┐`);
-        updateConsole(`│ ${' '.repeat(20)}📊 OCTree 分析报告${' '.repeat(20)}│`);
-        updateConsole(`└${'─'.repeat(58)}┘`);
-        updateConsole('');
-
-        if (result.knowledge_base && result.knowledge_base !== '无') {
-            updateConsole(`📚 领域知识库:`);
-            const kbText = result.knowledge_base.replace(/【领域知识库.*?】:/g, '').trim();
-            updateConsole(`   ${kbText.length > 80 ? kbText.substring(0, 80) + '...' : kbText}`);
-            updateConsole('');
-        }
-
-        updateConsole(`┌${'─'.repeat(20)} 基准性能 ─${'─'.repeat(28)}┐`);
-        updateConsole(`│ F1-Score:  ${result.baseline.f1.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ AUC:       ${result.baseline.auc.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ Log-Loss:  ${result.baseline.log_loss.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ MSE:       ${result.baseline.mse.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`└${'─'.repeat(58)}┘`);
-        updateConsole('');
-
-        updateConsole(`┌${'─'.repeat(20)} 优化后性能 ─${'─'.repeat(28)}┐`);
-        updateConsole(`│ F1-Score:  ${result.optimized.f1.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ AUC:       ${result.optimized.auc.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ Log-Loss:  ${result.optimized.log_loss.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`│ MSE:       ${result.optimized.mse.toFixed(4)}${' '.repeat(30)}│`);
-        updateConsole(`└${'─'.repeat(58)}┘`);
-        updateConsole('');
-
-        const f1Up = result.improvement.f1;
-        const aucUp = result.improvement.auc;
-        updateConsole(`┌${'─'.repeat(20)} 性能提升 ─${'─'.repeat(28)}┐`);
-        updateConsole(`│ F1 提升:   ${f1Up >= 0 ? '↑' : '↓'} ${Math.abs(f1Up).toFixed(1)}%${' '.repeat(30)}│`);
-        updateConsole(`│ AUC 提升:  ${aucUp >= 0 ? '↑' : '↓'} ${Math.abs(aucUp).toFixed(1)}%${' '.repeat(30)}│`);
-        updateConsole(`│ 新增特征:  ${result.improvement.features_added} 个${' '.repeat(30)}│`);
-        updateConsole(`└${'─'.repeat(58)}┘`);
-        updateConsole('');
-
-        if (result.generated_rules && result.generated_rules.length > 0) {
-            updateConsole(`┌${'─'.repeat(20)} 生成的特征规则 ─${'─'.repeat(28)}┐`);
-            result.generated_rules.forEach((rule) => {
-                updateConsole(`│ [第${rule.iteration}轮]${' '.repeat(48)}│`);
-                const codeDisplay = rule.code.length > 45 ? rule.code.substring(0, 42) + '...' : rule.code;
-                updateConsole(`│   ${codeDisplay}${' '.repeat(50 - codeDisplay.length)}│`);
-                updateConsole(`│   效果: ${rule.improvement}${' '.repeat(38 - rule.improvement.length)}│`);
-            });
-            updateConsole(`└${'─'.repeat(58)}┘`);
-            updateConsole('');
-        } else {
-            updateConsole(`📝 生成的特征规则: 无新增（数据已达较优性能）`);
-            updateConsole('');
-        }
-
-        if (result.iterations && result.iterations.length > 0) {
-            const acceptedCount = result.iterations.filter(i => i.accepted).length;
-            updateConsole(`┌${'─'.repeat(20)} 迭代摘要 ─${'─'.repeat(28)}┐`);
-            updateConsole(`│ 总迭代轮次: ${result.iterations.length} 轮${' '.repeat(30)}│`);
-            updateConsole(`│ 接受规则数: ${acceptedCount} 个${' '.repeat(30)}│`);
-            updateConsole(`│ 拒绝规则数: ${result.iterations.length - acceptedCount} 个${' '.repeat(30)}│`);
-            updateConsole(`└${'─'.repeat(58)}┘`);
-            updateConsole('');
-        }
-
-        if (result.decision_tree_explanation) {
-            updateConsole(`🌳 决策树解释（简化）:`);
-            const lines = result.decision_tree_explanation.split('\n').slice(0, 5);
-            lines.forEach(line => { if (line.trim()) updateConsole(`   ${line.substring(0, 55)}`); });
-            updateConsole('');
-        }
-
-        updateConsole(`┌${'─'.repeat(58)}┐`);
-        updateConsole(`│ ✅ ${result.message}${' '.repeat(58 - 2 - result.message.length)}│`);
-        updateConsole(`└${'─'.repeat(58)}┘`);
-    }
-
-    // 绑定上传事件
-    if (uploadBtn) {
-        uploadBtn.addEventListener('click', () => { if (fileInput) fileInput.click(); });
-    }
-    if (medicalOption) {
-        medicalOption.addEventListener('click', () => { if (fileInput) fileInput.click(); });
-    }
-    if (generalOption) {
-        generalOption.addEventListener('click', () => { if (fileInput) fileInput.click(); });
-    }
-
-    // 文件上传处理
-    if (fileInput) {
-        fileInput.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const fileExt = file.name.split('.').pop().toLowerCase();
-            if (!['csv', 'xlsx', 'xls'].includes(fileExt)) {
-                alert('请上传 CSV 或 Excel 文件');
-                fileInput.value = '';
-                return;
-            }
-
-            if (file.size > 10 * 1024 * 1024) {
-                alert('文件太大！请上传小于10MB的文件');
-                fileInput.value = '';
-                return;
-            }
-
-            startLoadingAnimation();
-            clearConsole();
-            updateConsole(`┌${'─'.repeat(58)}┐`);
-            updateConsole(`│ ${' '.repeat(18)}🚀 OCTree v2.0 分析中${' '.repeat(18)}│`);
-            updateConsole(`└${'─'.repeat(58)}┘`);
-            updateConsole('');
-            updateConsole(`📁 文件名: ${file.name}`);
-            updateConsole(`📊 文件大小: ${(file.size / 1024).toFixed(2)} KB`);
-            updateConsole(`⏳ 正在预处理数据...`);
-            updateConsole(`🤖 正在调用 LLM 理解数据...`);
-            updateConsole(`🔄 开始迭代优化...`);
-            updateConsole('');
-
-            const metricIter = document.getElementById('metric-iter');
-            const metricRules = document.getElementById('metric-rules');
-            if (metricIter) metricIter.textContent = '分析中';
-            if (metricRules) metricRules.textContent = '...';
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch('/api/upload', { method: 'POST', body: formData });
-                const result = await response.json();
-
-                if (result.success) {
-                    displayResults(result);
-                    if (metricIter) metricIter.textContent = result.generated_rules.length;
-                    if (metricRules) metricRules.textContent = result.improvement.features_added;
-                } else {
-                    updateConsole(`❌ 分析失败: ${result.error}`, true);
-                    if (metricIter) metricIter.textContent = '失败';
-                    if (metricRules) metricRules.textContent = '0';
-                }
-            } catch (error) {
-                updateConsole(`❌ 连接后端失败: ${error.message}`, true);
-                updateConsole(`💡 请确保后端服务已启动: python app.py`, true);
-                if (metricIter) metricIter.textContent = '错误';
-                if (metricRules) metricRules.textContent = '0';
-            } finally {
-                stopLoadingAnimation();
-                fileInput.value = '';
-            }
-        });
-    }
-});
-
-
-
-
-
-</script>
-
-
-
-
-
-
-
-<script>
-// ==========================================
-// 独立的上传功能（不依赖 DOMContentLoaded）
-// ==========================================
-
-// 等待页面加载完成
-window.addEventListener('load', function() {
-    console.log('页面加载完成，初始化上传功能...');
-
-    // 获取元素
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadDataBtn');
-    const consoleDiv = document.getElementById('console');
-    const medicalOption = document.getElementById('medicalOption');
-    const generalOption = document.getElementById('generalOption');
-
-    // 检查元素是否存在
-    console.log('fileInput:', fileInput);
-    console.log('uploadBtn:', uploadBtn);
-    console.log('consoleDiv:', consoleDiv);
-
-    if (!uploadBtn) {
-        console.error('找不到上传按钮！请确保 id="uploadDataBtn" 存在');
-        return;
-    }
-
-    if (!fileInput) {
-        console.error('找不到文件选择器！请确保 id="fileInput" 存在');
-        return;
-    }
-
-    // 简单的控制台输出函数
-    function logToConsole(msg, isError) {
-        if (!consoleDiv) {
-            console.log(msg);
-            return;
-        }
-        const prefix = isError ? '❌ ' : '> ';
-        consoleDiv.innerHTML += prefix + msg + '\n';
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
-
-    // 点击上传按钮
-    uploadBtn.addEventListener('click', function() {
-        console.log('上传按钮被点击');
-        fileInput.click();
-    });
-
-    // 点击医疗选项
-    if (medicalOption) {
-        medicalOption.addEventListener('click', function() {
-            fileInput.click();
-        });
-    }
-
-    // 点击通用选项
-    if (generalOption) {
-        generalOption.addEventListener('click', function() {
-            fileInput.click();
-        });
-    }
-
-    // 文件选择后上传
-    fileInput.addEventListener('change', async function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        console.log('文件已选择:', file.name);
-
-        // 清空并显示加载
-        if (consoleDiv) consoleDiv.innerHTML = '';
-        logToConsole('='.repeat(50));
-        logToConsole('🚀 OCTree v2.0 开始分析');
-        logToConsole('='.repeat(50));
-        logToConsole('📁 文件名: ' + file.name);
-        logToConsole('📊 文件大小: ' + (file.size / 1024).toFixed(2) + ' KB');
-        logToConsole('⏳ 正在分析中，请稍候...');
-        logToConsole('');
-
-        // 更新页面指标
-        const metricIter = document.getElementById('metric-iter');
-        const metricRules = document.getElementById('metric-rules');
-        if (metricIter) metricIter.textContent = '分析中';
-        if (metricRules) metricRules.textContent = '...';
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            logToConsole('📤 正在上传数据到后端...');
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-
-            logToConsole('📥 收到后端响应...');
-            const result = await response.json();
-
-            if (result.success) {
-                logToConsole('');
-                logToConsole('✅ 分析完成！');
-                logToConsole('='.repeat(50));
-                logToConsole('📊 基准性能: F1=' + result.baseline.f1.toFixed(4) + ', AUC=' + result.baseline.auc.toFixed(4));
-                logToConsole('📈 优化后性能: F1=' + result.optimized.f1.toFixed(4) + ', AUC=' + result.optimized.auc.toFixed(4));
-                logToConsole('🎯 F1提升: +' + result.improvement.f1.toFixed(1) + '%');
-                logToConsole('✨ 新增特征数: ' + result.improvement.features_added);
-                logToConsole('='.repeat(50));
-
-                if (result.generated_rules && result.generated_rules.length > 0) {
-                    logToConsole('📝 生成的规则:');
-                    result.generated_rules.forEach(rule => {
-                        logToConsole('   第' + rule.iteration + '轮: ' + rule.code.substring(0, 60) + '...');
-                    });
-                }
-
-                // 更新指标
-                if (metricIter) metricIter.textContent = result.generated_rules.length;
-                if (metricRules) metricRules.textContent = result.improvement.features_added;
-
-            } else {
-                logToConsole('❌ 分析失败: ' + result.error, true);
-            }
-
-        } catch (error) {
-            console.error('上传错误:', error);
-            logToConsole('❌ 连接后端失败: ' + error.message, true);
-            logToConsole('💡 请确保后端服务已启动: python app.py', true);
-        } finally {
-            fileInput.value = '';
-        }
-    });
-
-    console.log('上传功能初始化完成！');
 });
 </script>
+
+
+
+
+
+
+
+
 <!-- ==========================================
      分析报告弹窗模态框（紧密排布版）
 ========================================== -->
@@ -2041,10 +1539,10 @@ window.addEventListener('load', function() {
     min-height: 0;
 }
 
-/* 第一行：指标 - 4个紧凑卡片 */
+/* 分类和回归指标共用的自适应卡片 */
 .row-metrics {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
 }
 
@@ -2195,241 +1693,9 @@ window.addEventListener('load', function() {
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-<script>
-// ==========================================
-// 弹窗控制函数（紧密排布版）
-// ==========================================
 
-let iterationChart = null;
-let currentReportData = null;
-
-function openAnalysisModal() {
-    const modal = document.getElementById('analysisModal');
-    const loadingArea = document.getElementById('loadingArea');
-    const resultArea = document.getElementById('resultArea');
-
-    loadingArea.style.display = 'flex';
-    resultArea.style.display = 'none';
-    document.getElementById('progressBar').style.width = '0%';
-    document.getElementById('progressPercent').textContent = '0%';
-    document.getElementById('loadingStep').textContent = '准备就绪...';
-
-    modal.style.display = 'flex';
-}
-
-function closeAnalysisModal() {
-    const modal = document.getElementById('analysisModal');
-    modal.style.display = 'none';
-    if (iterationChart) { iterationChart.destroy(); iterationChart = null; }
-    currentReportData = null;
-}
-
-function updateProgress(percent, stepText) {
-    document.getElementById('progressBar').style.width = percent + '%';
-    document.getElementById('progressPercent').textContent = percent + '%';
-    if (stepText) document.getElementById('loadingStep').textContent = stepText;
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function createChart(iterations) {
-    const canvas = document.getElementById('iterationChartCanvas');
-    if (!canvas || iterations.length === 0) return;
-
-    if (iterationChart) iterationChart.destroy();
-
-    const labels = iterations.map((_, idx) => `${idx + 1}`);
-    const f1Data = iterations.map(i => i.f1_after);
-    const mseData = iterations.map(i => i.mse_after);
-
-    iterationChart = new Chart(canvas, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                { label: 'F1', data: f1Data, borderColor: '#0066cc', backgroundColor: 'rgba(0,102,204,0.05)', tension: 0.3, fill: true, pointRadius: 3, pointBackgroundColor: '#0066cc', borderWidth: 2, yAxisID: 'y' },
-                { label: 'MSE', data: mseData, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.05)', tension: 0.3, fill: true, pointRadius: 3, pointBackgroundColor: '#dc2626', borderWidth: 2, yAxisID: 'y1' }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { position: 'top', labels: { boxWidth: 8, font: { size: 9 } } },
-                tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(4)}` } }
-            },
-            scales: {
-                y: { title: { display: true, text: 'F1', font: { size: 8 } }, min: 0, max: 1 },
-                y1: { title: { display: true, text: 'MSE', font: { size: 8 } }, position: 'right', min: 0, grid: { drawOnChartArea: false } }
-            }
-        }
-    });
-}
-
-function downloadReport() {
-    if (!currentReportData) { alert('没有可下载的报告'); return; }
-
-    const r = currentReportData;
-    const html = `<!DOCTYPE html>
-    <html><head><meta charset="UTF-8"><title>OCTree报告</title>
-    <style>body{font-family:system-ui;margin:20px}.container{max-width:700px;margin:0 auto;background:white;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}h1{color:#0066cc}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px 0}.metric{background:#f8fafc;padding:10px;border-radius:8px;text-align:center}table{width:100%;border-collapse:collapse}th,td{padding:6px;border-bottom:1px solid #ddd}.improve{color:#15803d}</style>
-    <body><div class="container"><h1>📊 OCTree 分析报告</h1><p>${new Date().toLocaleString()}</p>
-    <div class="metrics"><div class="metric"><strong>${r.baseline.f1.toFixed(4)}→${r.optimized.f1.toFixed(4)}</strong><br>F1</div>
-    <div class="metric"><strong>${r.baseline.mse.toFixed(4)}→${r.optimized.mse.toFixed(4)}</strong><br>MSE</div>
-    <div class="metric"><strong>+${r.improvement.features_added}</strong><br>新增特征</div></div>
-    <table><th>指标</th><th>基准</th><th>优化后</th></tr>
-    <tr><td>F1</td><td>${r.baseline.f1.toFixed(4)}</td><td>${r.optimized.f1.toFixed(4)}</td></tr>
-    <tr><td>MSE</td><td>${r.baseline.mse.toFixed(4)}</td><td>${r.optimized.mse.toFixed(4)}</td></tr>
-    </table>${r.generated_rules?.length ? `<h3>📝 规则</h3>${r.generated_rules.map(rule => `<div><strong>第${rule.iteration}轮</strong><br><code>${escapeHtml(rule.code)}</code><br>${rule.improvement}</div>`).join('')}` : ''}
-    <div style="margin-top:15px;text-align:center;color:#64748b;">OCTree 生成</div>
-    </div></body></html>`;
-
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `OCTree_Report_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-function showReport(result) {
-    currentReportData = result;
-
-    const baseline = result.baseline;
-    const optimized = result.optimized;
-    const improvement = result.improvement;
-    const iterations = result.iterations || [];
-    const generatedRules = result.generated_rules || [];
-    const decisionTree = result.decision_tree_explanation || '';
-
-    const f1Change = (optimized.f1 - baseline.f1) / baseline.f1 * 100;
-    const mseChange = (baseline.mse - optimized.mse) / baseline.mse * 100;
-
-    // 第一行：4个指标
-    document.getElementById('metricsRow').innerHTML = `
-        <div class="metric-card"><div class="metric-value">${baseline.f1.toFixed(3)}→${optimized.f1.toFixed(3)}</div><div class="metric-label">F1-Score</div><div class="metric-change ${f1Change >= 0 ? 'change-up' : 'change-down'}">${f1Change >= 0 ? '↑' : '↓'} ${Math.abs(f1Change).toFixed(1)}%</div></div>
-        <div class="metric-card"><div class="metric-value">${baseline.mse.toFixed(3)}→${optimized.mse.toFixed(3)}</div><div class="metric-label">MSE 损失</div><div class="metric-change ${mseChange >= 0 ? 'change-up' : 'change-down'}">${mseChange >= 0 ? '↓' : '↑'} ${Math.abs(mseChange).toFixed(1)}%</div></div>
-        <div class="metric-card"><div class="metric-value">${baseline.log_loss.toFixed(3)}→${optimized.log_loss.toFixed(3)}</div><div class="metric-label">Log-Loss</div><div class="metric-change">${(baseline.log_loss - optimized.log_loss) >= 0 ? '✓ 改善' : '✗ 变差'}</div></div>
-        <div class="metric-card"><div class="metric-value">+${improvement.features_added}</div><div class="metric-label">新增特征</div><div class="metric-change">${improvement.features_added > 0 ? '✅ 已添加' : '⭕ 无新增'}</div></div>
-    `;
-
-    // 决策树
-    let treeHtml = '';
-    if (decisionTree) {
-        const lines = decisionTree.split('\n').slice(0, 10);
-        treeHtml = `<div class="tree-content">${escapeHtml(lines.join('\n'))}</div>`;
-    } else {
-        treeHtml = `<div class="tree-content" style="color:#64748b;">无法生成决策树</div>`;
-    }
-    document.getElementById('treeContent').innerHTML = treeHtml;
-
-    // 规则列表（显示接受和拒绝的规则）
-    let rulesHtml = '';
-    if (generatedRules.length > 0) {
-        rulesHtml = generatedRules.map(rule => `
-            <div class="rule-item rule-accepted">
-                <div class="rule-header"><span class="rule-round">第 ${rule.iteration} 轮</span><span class="rule-status status-accepted">✓ 已接受</span></div>
-                <div class="rule-code">${escapeHtml(rule.code)}</div>
-                <div class="rule-metrics">🏆 ${rule.improvement}</div>
-            </div>
-        `).join('');
-    }
-    // 添加被拒绝的规则（从 iterations 中提取）
-    if (iterations.length > 0) {
-        const rejectedRules = iterations.filter(i => !i.accepted && i.rule_code);
-        rejectedRules.slice(0, 3).forEach(iter => {
-            rulesHtml += `
-                <div class="rule-item rule-rejected">
-                    <div class="rule-header"><span class="rule-round">第 ${iter.iteration} 轮</span><span class="rule-status status-rejected">✗ 已拒绝</span></div>
-                    <div class="rule-code">${escapeHtml(iter.rule_code?.substring(0, 80) || '')}${iter.rule_code?.length > 80 ? '...' : ''}</div>
-                    <div class="rule-metrics">💬 ${escapeHtml(iter.reason || '')}</div>
-                </div>
-            `;
-        });
-    }
-    if (!rulesHtml) {
-        rulesHtml = '<div style="color:#64748b; text-align:center; padding:15px;">未生成特征规则</div>';
-    }
-    document.getElementById('rulesList').innerHTML = rulesHtml;
-
-    // 总结
-    document.getElementById('summaryRow').innerHTML = `
-        <div class="summary-text">✅ ${result.message || `分析完成！${improvement.features_added > 0 ? `生成 ${improvement.features_added} 个新特征，` : ''}F1 ${f1Change >= 0 ? '提升' : '变化'} ${Math.abs(f1Change).toFixed(1)}%`}</div>
-    `;
-
-    setTimeout(() => createChart(iterations), 100);
-
-    document.getElementById('loadingArea').style.display = 'none';
-    document.getElementById('resultArea').style.display = 'block';
-}
-
-// 上传和分析
-function uploadAndAnalyze() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (!file) { alert('请先选择文件'); return; }
-
-    const fileExt = file.name.split('.').pop().toLowerCase();
-    if (!['csv', 'xlsx', 'xls'].includes(fileExt)) { alert('请上传 CSV 或 Excel 文件'); return; }
-
-    openAnalysisModal();
-
-    const steps = [
-        { percent: 25, text: '上传中...', delay: 500 },
-        { percent: 50, text: '预处理数据...', delay: 800 },
-        { percent: 75, text: 'LLM 生成规则...', delay: 1200 },
-        { percent: 100, text: '生成报告...', delay: 800 }
-    ];
-
-    let stepIndex = 0;
-    function runNextStep() {
-        if (stepIndex < steps.length) {
-            updateProgress(steps[stepIndex].percent, steps[stepIndex].text);
-            stepIndex++;
-            setTimeout(runNextStep, steps[stepIndex - 1].delay);
-        }
-    }
-    setTimeout(runNextStep, 200);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch('/api/upload', { method: 'POST', body: formData })
-        .then(r => r.json())
-        .then(result => {
-            if (result.success) {
-                updateProgress(100, '完成！');
-                setTimeout(() => showReport(result), 300);
-            } else {
-                alert('分析失败: ' + result.error);
-                closeAnalysisModal();
-            }
-        })
-        .catch(error => {
-            alert('连接失败: ' + error.message);
-            closeAnalysisModal();
-        });
-}
-
-// 绑定事件
-document.addEventListener('DOMContentLoaded', function() {
-    const uploadBtn = document.getElementById('uploadDataBtn');
-    const fileInput = document.getElementById('fileInput');
-
-    if (uploadBtn) uploadBtn.addEventListener('click', () => fileInput?.click());
-    if (fileInput) fileInput.addEventListener('change', () => uploadAndAnalyze());
-
-    console.log('✅ 上传功能已初始化');
-});
-</script>
+<script src="tabular_data/web.js"></script>
 <style>
     .final-demo-panel {
         margin-top: 24px;
@@ -2500,6 +1766,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function safeNumber(value) {
+        if (value === null || value === undefined || value === '') return null;
         const num = Number(value);
         return Number.isFinite(num) ? num : null;
     }
@@ -2565,6 +1832,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const codes = generated.feature_codes || record.generated_rules || [];
             return [
                 '【Tabular 特征列扩充】',
+                `评估模型：XGBoost（${String((record.verification || {}).model?.device || '').startsWith('cuda') ? 'GPU' : 'CPU'}）`,
                 `状态：${accepted}`,
                 metricBlock(record),
                 `接受的新特征：${features.length ? features.join(', ') : '暂无'}`,
@@ -2613,7 +1881,7 @@ document.addEventListener('DOMContentLoaded', function() {
         wrapper.className = 'final-demo-panel';
         wrapper.innerHTML = `
             <div class="final-demo-title">结题版三类数据扩充演示</div>
-            <div class="final-demo-desc">保留原 OCTree 表格特征扩充闭环，并新增 Math 推理链扩充、Code 代码修复轨迹扩充。点击按钮会调用 Flask 后端接口，结果会写入 outputs/。</div>
+            <div class="final-demo-desc">保留原 OCTree 表格特征扩充闭环，并新增 Math 推理链扩充、Code 代码修复轨迹扩充。点击按钮会调用 Flask 后端接口，结果会写入各模块的输出目录。</div>
             <div class="final-demo-buttons">
                 <button class="final-demo-btn" data-run-mode="tabular">Tabular 特征列扩充</button>
                 <button class="final-demo-btn" data-run-mode="math">Math 推理链扩充</button>
@@ -2637,11 +1905,20 @@ document.addEventListener('DOMContentLoaded', function() {
         appendConsole(`结果已返回：${record.modality || 'all_demo'}，accepted=${record.accepted}`);
     }
 
+    let demoRunning = false;
+
     async function runDemo(mode) {
+        if (demoRunning || window.TabularUI.isBusy()) return;
+        demoRunning = true;
         const panel = ensureResultPanel();
         panel.textContent = `正在运行 ${mode} demo，请稍等...`;
         appendConsole(`开始运行 ${mode} demo`);
         try {
+            if (mode === 'tabular') {
+                const record = await window.TabularUI.runDemo();
+                if (record) showResult(record);
+                return;
+            }
             if (mode === 'all') {
                 const data = await postJson(API.all, {});
                 const parts = [];
@@ -2652,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     parts.push('错误：' + JSON.stringify(data.errors, null, 2));
                 }
                 panel.textContent = parts.join('\n\n==============================\n\n');
-                appendConsole('一键 Demo 运行完成，输出已写入 outputs/');
+                appendConsole('一键 Demo 运行完成，结果已保存');
                 return;
             }
             const data = await postJson(API[mode], {});
@@ -2660,47 +1937,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             panel.textContent = `运行失败：${error.message}`;
             appendConsole(`运行失败：${error.message}`);
+        } finally {
+            demoRunning = false;
         }
-    }
-
-    function initUpload() {
-        let uploadBtn = byId('uploadDataBtn');
-        let fileInput = byId('fileInput');
-        if (!uploadBtn || !fileInput) return;
-
-        const cleanBtn = uploadBtn.cloneNode(true);
-        const cleanInput = fileInput.cloneNode(true);
-        uploadBtn.parentNode.replaceChild(cleanBtn, uploadBtn);
-        fileInput.parentNode.replaceChild(cleanInput, fileInput);
-        uploadBtn = cleanBtn;
-        fileInput = cleanInput;
-
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', async () => {
-            const file = fileInput.files && fileInput.files[0];
-            if (!file) return;
-            appendConsole(`上传文件：${file.name}`);
-            const formData = new FormData();
-            formData.append('file', file);
-            const panel = ensureResultPanel();
-            panel.textContent = '正在运行上传数据的 Tabular OCTree 分析...';
-            try {
-                const data = await postForm(API.upload, formData);
-                const record = data.record || data;
-                showResult(record);
-            } catch (error) {
-                panel.textContent = `上传分析失败：${error.message}`;
-                appendConsole(`上传分析失败：${error.message}`);
-            } finally {
-                fileInput.value = '';
-            }
-        });
-        appendConsole('上传事件已整理为单一 initUpload() 绑定');
     }
 
     function initFinalDemo() {
         ensureResultPanel();
-        initUpload();
     }
 
     if (document.readyState === 'loading') {

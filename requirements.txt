@@ -3,7 +3,8 @@ flask-cors
 pandas
 numpy
 scikit-learn
-xgboost
+xgboost-cu12==3.4.1; sys_platform == "linux"
+xgboost==3.4.1; sys_platform != "linux"
 openai
 sympy
 datasets
