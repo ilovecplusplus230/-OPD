@@ -1,0 +1,3 @@
+﻿baseline,candidate,accuracy_gain,improved_cases,regressed_cases,unchanged_cases,paired_bootstrap_ci_low,paired_bootstrap_ci_high,exact_mcnemar_p
+base,opsd_original,0.07499999999999996,5,2,33,-0.05,0.2,0.453125
+base,opsd_history,0.125,6,1,33,0.0,0.25,0.125

@@ -1,0 +1,8 @@
+{
+  "model_variant": "base",
+  "task": "direct",
+  "calls": 40,
+  "prompt_tokens_retokenized": 3347,
+  "completion_tokens_retokenized_without_eos": 16587,
+  "note": "Reconstructed from saved prompts and responses after the original session usage file was overwritten by a smoke test."
+}

@@ -61,3 +61,8 @@ def test_strict_acceptance_requires_answer_and_new_node() -> None:
 def test_llm_json_parser_tolerates_latex_backslashes() -> None:
     raw = r'{"steps":["Use \cos(180+45).","Then \frac{1}{2} follows."]}'
     assert _parse_steps(raw) == [r"Use \cos(180+45).", r"Then \frac{1}{2} follows."]
+
+
+def test_llm_json_parser_tolerates_mixed_latex_escaping() -> None:
+    raw = r'{"steps":["Use \\sqrt{2} \cdot \\sqrt{3}.","Obtain \\sqrt{6}."]}'
+    assert _parse_steps(raw) == [r"Use \sqrt{2} \cdot \sqrt{3}.", r"Obtain \sqrt{6}."]

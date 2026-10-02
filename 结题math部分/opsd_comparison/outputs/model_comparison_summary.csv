@@ -1,0 +1,4 @@
+﻿task,model_variant,sample_count,primary_rate,secondary_rate,primary_metric,secondary_metric,retained_quality_score,retained_quality_gain
+direct_solve,base,40,0.8,0.8,pass@1,pass@1,,
+direct_solve,opsd_original,40,0.875,0.875,pass@1,pass@1,,
+direct_solve,opsd_history,40,0.925,0.925,pass@1,pass@1,,

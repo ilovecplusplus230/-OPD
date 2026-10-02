@@ -1,0 +1,6 @@
+outputs/*.jsonl
+outputs/*.csv
+outputs/*.md
+__pycache__/
+*.pyc
+

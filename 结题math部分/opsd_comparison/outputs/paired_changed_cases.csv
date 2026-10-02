@@ -1,0 +1,15 @@
+﻿id,candidate,base_correct,candidate_correct,change
+mathopd_heldout_018,opsd_original,False,True,improved
+mathopd_heldout_019,opsd_original,False,True,improved
+mathopd_heldout_021,opsd_original,False,True,improved
+mathopd_heldout_026,opsd_original,False,True,improved
+mathopd_heldout_029,opsd_original,False,True,improved
+mathopd_heldout_035,opsd_original,True,False,regressed
+mathopd_heldout_039,opsd_original,True,False,regressed
+mathopd_heldout_018,opsd_history,False,True,improved
+mathopd_heldout_019,opsd_history,False,True,improved
+mathopd_heldout_021,opsd_history,False,True,improved
+mathopd_heldout_023,opsd_history,False,True,improved
+mathopd_heldout_026,opsd_history,False,True,improved
+mathopd_heldout_029,opsd_history,False,True,improved
+mathopd_heldout_039,opsd_history,True,False,regressed

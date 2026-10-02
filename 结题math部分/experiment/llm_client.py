@@ -109,7 +109,10 @@ def _parse_steps(raw: str) -> list[str]:
         # LLMs often place LaTeX such as \cos or \frac directly inside JSON.
         # Escape those backslashes once and retry instead of treating the whole
         # JSON object as one reasoning step.
-        repaired = re.sub(r'\\(?!["\\/])', r'\\\\', text)
+        # Escape isolated LaTeX commands before JSON treats sequences such as
+        # ``\\frac`` as control characters. Keep existing ``\\\\sqrt`` intact.
+        repaired = re.sub(r'(?<!\\)\\(?=[A-Za-z]{2,})', r'\\\\', text)
+        repaired = re.sub(r'(?<!\\)\\(?![\\"/bfnrtu])', r'\\\\', repaired)
         try:
             data = json.loads(repaired)
             if isinstance(data, dict) and isinstance(data.get("steps"), list):

@@ -1,0 +1,15 @@
+{
+  "source": "C:\\Users\\费代强\\OneDrive\\桌面\\大创项目\\MATHOPD\\results\\v2_long_completion\\evaluation\\held_out_outputs.jsonl",
+  "variants": {
+    "opsd_original": {
+      "count": 40,
+      "pass_at_1": 0.875,
+      "destination": "opsd_comparison\\outputs\\direct_opsd_original.jsonl"
+    },
+    "opsd_history": {
+      "count": 40,
+      "pass_at_1": 0.925,
+      "destination": "opsd_comparison\\outputs\\direct_opsd_history.jsonl"
+    }
+  }
+}

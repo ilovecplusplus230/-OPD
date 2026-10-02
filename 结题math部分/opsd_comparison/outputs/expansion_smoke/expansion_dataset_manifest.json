@@ -1,0 +1,68 @@
+{
+  "source_count": 40,
+  "eligible_count": 25,
+  "selected_count": 1,
+  "selection_rule": "at least three parsed nodes and one safe middle node",
+  "skipped": [
+    {
+      "id": "mathopd_heldout_000",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_001",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_002",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_004",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_005",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_007",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_008",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_010",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_014",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_017",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_022",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_025",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_029",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_032",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    },
+    {
+      "id": "mathopd_heldout_036",
+      "reason": "推理步骤少于 3 个，无法安全遮盖中间节点。"
+    }
+  ]
+}

@@ -105,6 +105,13 @@ python scripts/rebuild_reports.py
 - `report/数学扩充实验报告.md`：自动汇总的数学章节草稿。
 - `report/典型案例.md`：成功和失败案例。
 
+## OPSD 训练前后对照
+
+`opsd_comparison/` 把真实 MATHOPD 训练结果与本目录的节点扩充流程串联起来，包含 Base、
+Original OPSD 和 History OPSD 三组同题对照、配对统计、PNG 图表以及一组端到端扩充冒烟测试。
+模型权重没有提交到仓库，已有结果可直接查看；复现实验和权重路径说明见
+[`opsd_comparison/README.md`](opsd_comparison/README.md)。
+
 ## 文件结构
 
 - `original_math_package/`：队友提供的原始数学扩充包，只作为基础模块使用。
@@ -115,6 +122,7 @@ python scripts/rebuild_reports.py
 - `scripts/download_datasets.py`：下载并标准化三个公开数据集。
 - `scripts/audit_datasets.py`：检查缺失字段、节点数量和参考答案可验证性。
 - `scripts/rebuild_reports.py`：根据已有轨迹重建图表和报告，不调用 API。
+- `opsd_comparison/`：OPSD 训练前后模型对照、统计分析和扩充流程串联结果。
 - `tests/`：答案验证和接收规则测试。
 
 ## 结题时怎么解释

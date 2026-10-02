@@ -1,0 +1,52 @@
+{
+  "models": [
+    {
+      "variant": "base",
+      "correct": 32,
+      "total": 40,
+      "accuracy": 0.8,
+      "ci_low": 0.6524239261814333,
+      "ci_high": 0.8950013502683314
+    },
+    {
+      "variant": "opsd_original",
+      "correct": 35,
+      "total": 40,
+      "accuracy": 0.875,
+      "ci_low": 0.7388757932976187,
+      "ci_high": 0.9454058022645873
+    },
+    {
+      "variant": "opsd_history",
+      "correct": 37,
+      "total": 40,
+      "accuracy": 0.925,
+      "ci_low": 0.8013546984090248,
+      "ci_high": 0.9741644432281419
+    }
+  ],
+  "paired_vs_base": [
+    {
+      "baseline": "base",
+      "candidate": "opsd_original",
+      "accuracy_gain": 0.07499999999999996,
+      "improved_cases": 5,
+      "regressed_cases": 2,
+      "unchanged_cases": 33,
+      "paired_bootstrap_ci_low": -0.05,
+      "paired_bootstrap_ci_high": 0.2,
+      "exact_mcnemar_p": 0.453125
+    },
+    {
+      "baseline": "base",
+      "candidate": "opsd_history",
+      "accuracy_gain": 0.125,
+      "improved_cases": 6,
+      "regressed_cases": 1,
+      "unchanged_cases": 33,
+      "paired_bootstrap_ci_low": 0.0,
+      "paired_bootstrap_ci_high": 0.25,
+      "exact_mcnemar_p": 0.125
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "mathopd_heldout_count": 40,
+  "closeout_candidate_pool_count": 300,
+  "closeout_formal_record_count": 90,
+  "candidate_pool_exact_normalized_overlap_count": 1,
+  "formal_90_exact_normalized_overlap_count": 0,
+  "candidate_pool_matches": [
+    {
+      "heldout_id": "mathopd_heldout_005",
+      "heldout_source_id": "test/algebra/1787.json",
+      "closeout_id": "math500_test/algebra/1787.json",
+      "closeout_dataset": "MATH-500"
+    }
+  ],
+  "formal_90_matches": [],
+  "recommended_shared_benchmark": "MATHOPD audited held-out 40",
+  "reason": "These 40 questions were already checked against the complete OPSD training split. They should be reused for Base/OPSD adapter comparison without entering training."
+}
