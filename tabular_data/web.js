@@ -7,7 +7,11 @@
     let report = null;
     let chart = null;
     const byId = id => document.getElementById(id);
-    const metricNames = {accuracy: 'Accuracy', auc: 'AUC', f1: 'F1', log_loss: 'Log Loss', mse: 'MSE'};
+    const metricNames = {accuracy: 'Accuracy', balanced_accuracy: 'Balanced Accuracy', auc: 'AUC',
+        f1: 'Weighted F1', f1_macro: 'Macro F1', log_loss: 'Log Loss', mse: 'MSE', rmse: 'RMSE', mae: 'MAE', r2: 'R²'};
+    const lowerIsBetter = key => ['mse', 'rmse', 'mae', 'log_loss'].includes(key);
+    const applicableMetrics = data => Object.entries(metricNames).filter(([key]) =>
+        numeric(data.baseline[key]) !== null || numeric(data.optimized[key]) !== null);
 
     function numeric(value) {
         if (value === null || value === undefined || value === '') return null;
@@ -17,7 +21,19 @@
 
     function format(value, digits = 4) {
         const number = numeric(value);
-        return number === null ? '不适用' : number.toFixed(digits);
+        if (number === null) return '不适用';
+        return number !== 0 && Math.abs(number) < 0.0001 ? number.toExponential(2) : number.toFixed(digits);
+    }
+
+    const displayJson = value => JSON.stringify(value, (key, item) =>
+        typeof item === 'number' && !Number.isInteger(item) ? format(item) : item, 2);
+
+    function explanationText(proposal) {
+        const adaptation = proposal.adaptation || {};
+        const reference = adaptation.source_candidate ? `\n反馈来源：第 ${adaptation.source_round} 轮 ${adaptation.source_candidate}（${adaptation.outcome}）\n${adaptation.observed_reason || ''}` : '';
+        const constants = (proposal.constant_provenance || []).map(item =>
+            `${item.symbol} ≈ ${format(item.value)} [${item.source}]：${item.calculation} ${item.purpose}`).join('\n');
+        return `历史反馈调整：${adaptation.action || '未记录'}${reference}\n参数来源与计算：\n${constants}\n公式构造步骤：\n${(proposal.derivation || []).join('\n')}`;
     }
 
     function escapeHtml(value) {
@@ -56,6 +72,8 @@
                 accepted: Boolean(item.accepted),
                 reason: item.reason || '',
                 metrics: item.valid === false ? {} : item.metrics || {},
+                explanation: item.explanation || {},
+                candidates: item.candidates || [],
                 before,
                 after
             };
@@ -71,19 +89,27 @@
     }
 
     function metricCards(data) {
-        return Object.entries(metricNames).map(([key, label]) => {
-            const change = relativeChange(data.baseline[key], data.optimized[key], ['mse', 'log_loss'].includes(key));
+        return applicableMetrics(data).map(([key, label]) => {
+            const change = relativeChange(data.baseline[key], data.optimized[key], lowerIsBetter(key));
             return `<div class="metric-card"><div class="metric-value">${format(data.baseline[key], 3)} → ${format(data.optimized[key], 3)}</div><div class="metric-label">${label}</div><div class="metric-change">${change}</div></div>`;
         }).join('') + `<div class="metric-card"><div class="metric-value">${data.acceptedFeatures.length}</div><div class="metric-label">保留的新特征</div></div>`;
     }
 
     function ruleCards(data) {
         if (!data.iterations.length) return '<p>没有迭代记录。</p>';
-        return data.iterations.map(item => {
+        return data.iterations.flatMap(round => round.candidates.length ? round.candidates.map((candidate, index) => ({
+            round: `${round.round} · 候选 ${index + 1}`, code: candidate.feature_code || '',
+            accepted: candidate.accepted, reason: candidate.reason || '', metrics: candidate.metrics || {},
+            explanation: candidate.proposal || {}, usage: candidate.model_usage || {}
+        })) : [round]).map(item => {
             const state = item.accepted ? 'accepted' : 'rejected';
             const metrics = Object.entries(metricNames).filter(([key]) => numeric(item.metrics[key]) !== null)
                 .map(([key, label]) => `${label}=${format(item.metrics[key])}`).join('，');
-            return `<div class="rule-item rule-${state}"><div class="rule-header"><span class="rule-round">第 ${escapeHtml(item.round)} 轮</span><span class="rule-status status-${state}">${item.accepted ? '已接受' : '未接受'}</span></div><pre class="rule-code">${escapeHtml(item.code)}</pre><div class="rule-metrics">候选评估：${escapeHtml(metrics || '未进入模型评估')}</div><div class="rule-metrics">${escapeHtml(item.reason)}</div></div>`;
+            const explanation = item.explanation || {};
+            const details = explanation.hypothesis ? `<p>来源：${escapeHtml(explanation.source || '')}；输入列：${escapeHtml((explanation.input_columns || []).join('、'))}</p><p>关系假说：${escapeHtml(explanation.hypothesis)}</p><p>提取方式：${escapeHtml(explanation.construction)}</p><pre style="white-space:pre-wrap">${escapeHtml(explanationText(explanation))}</pre><details><summary>训练集统计依据（显示近似值）</summary><pre>${escapeHtml(displayJson(explanation.evidence || {}))}</pre></details>` : '';
+            const usage = Object.entries(item.usage || {}).map(([name, info]) => `${name}：${info.split_count || 0} 次分裂`).join('；');
+            const formula = explanation.display_expression || item.code;
+            return `<div class="rule-item rule-${state}"><div class="rule-header"><span class="rule-round">第 ${escapeHtml(item.round)} 轮</span><span class="rule-status status-${state}">${item.accepted ? '已接受' : '未接受'}</span></div>${details}<pre class="rule-code">${escapeHtml(formula)}</pre><div class="rule-metrics">模型使用：${escapeHtml(usage || '未记录')}</div><div class="rule-metrics">候选评估：${escapeHtml(metrics || '未进入模型评估')}</div><div class="rule-metrics">${escapeHtml(item.reason)}</div></div>`;
         }).join('');
     }
 
@@ -98,13 +124,15 @@
         }
         const points = [data.baseline, ...data.iterations.map(item => item.after)];
         const labels = ['基线', ...data.iterations.map(item => `第 ${item.round} 轮`)];
+        const primary = points.some(point => numeric(point.f1_macro) !== null) ? 'f1_macro'
+            : points.some(point => numeric(point.f1) !== null) ? 'f1' : 'mse';
         canvas.hidden = true;
         fallback.hidden = false;
-        fallback.innerHTML = `<table><thead><tr><th>轮次</th><th>F1</th><th>MSE</th></tr></thead><tbody>${points.map((point, index) => `<tr><td>${escapeHtml(labels[index])}</td><td>${format(point.f1)}</td><td>${format(point.mse)}</td></tr>`).join('')}</tbody></table>`;
+        fallback.innerHTML = `<table><thead><tr><th>轮次</th><th>${metricNames[primary]}</th></tr></thead><tbody>${points.map((point, index) => `<tr><td>${escapeHtml(labels[index])}</td><td>${format(point[primary])}</td></tr>`).join('')}</tbody></table>`;
         if (typeof window.Chart !== 'function') return;
         const datasets = [];
-        if (points.some(point => numeric(point.f1) !== null)) {
-            datasets.push({label: 'F1', data: points.map(point => numeric(point.f1)), borderColor: '#0066cc', yAxisID: 'y'});
+        if (primary !== 'mse') {
+            datasets.push({label: metricNames[primary], data: points.map(point => numeric(point[primary])), borderColor: '#0066cc', yAxisID: 'y'});
         }
         if (points.some(point => numeric(point.mse) !== null)) {
             datasets.push({label: 'MSE', data: points.map(point => numeric(point.mse)), borderColor: '#dc2626', yAxisID: 'y1'});
@@ -143,8 +171,11 @@
         byId('metric-rules').textContent = String(report.acceptedFeatures.length);
         byId('console').textContent = [
             report.summary,
-            ...Object.entries(metricNames).map(([key, label]) => `${label}：${format(report.baseline[key])} → ${format(report.optimized[key])}；${relativeChange(report.baseline[key], report.optimized[key], ['mse', 'log_loss'].includes(key))}`),
-            ...report.iterations.map(item => `第 ${item.round} 轮：${item.accepted ? '接受' : '未接受'}\n${item.code}\n${item.reason}`)
+            ...applicableMetrics(report).map(([key, label]) => `${label}：${format(report.baseline[key])} → ${format(report.optimized[key])}；${relativeChange(report.baseline[key], report.optimized[key], lowerIsBetter(key))}`),
+            ...report.iterations.flatMap(item => item.candidates.length ? item.candidates.map(candidate => {
+                const proposal = candidate.proposal || {};
+                return `第 ${item.round} 轮候选：${proposal.name || ''}\n依据列：${(proposal.input_columns || []).join('、')}\n关系假说：${proposal.hypothesis || ''}\n提取方式：${proposal.construction || ''}\n${explanationText(proposal)}\n${proposal.display_expression || candidate.feature_code}\n${candidate.accepted ? '接受' : '未接受'}：${candidate.reason}`;
+            }) : [`第 ${item.round} 轮：${item.accepted ? '接受' : '未接受'}\n${item.code}\n${item.reason}`])
         ].join('\n');
         renderChart(report);
     }
@@ -202,7 +233,7 @@
     }
 
     function runSimulation() {
-        return runRequest('/api/simulate', {method: 'POST'}, '正在用内置 Wine 样例和本地特征规则运行交叉验证...');
+        return runRequest('/api/simulate', {method: 'POST'}, '正在用Jungle Chess 训练集样例和本地特征规则运行交叉验证...');
     }
 
     function runDemo() {

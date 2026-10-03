@@ -1,0 +1,6 @@
+feature,split_count,used_by_xgboost,gain,total_gain_fraction,primary_metric,importance_score,importance_std,single_column_importance_score,drop_retrain_score_drop,supported_predictive_contribution,dependency_group
+oct_simple_difference_5_r1,98.0,True,0.457963228225708,0.03435168869041675,f1_macro,0.4283256843544073,0.012430832005000553,0.1046765970523138,0.22236201215548435,True,oct_simple_difference_5_r1 | oct_composite_sum_0_r2 | oct_signed_log_4_r3 | oct_composite_sum_13_r4
+oct_composite_sum_0_r2,197.0,True,3.3390660285949707,0.503480477616793,f1_macro,0.41319690582097046,0.009960395560150074,0.3500425441401742,0.16352763556922778,True,oct_composite_sum_0_r2 | oct_signed_log_4_r3 | oct_composite_sum_13_r4
+oct_signed_log_4_r3,134.0,True,1.0686430931091309,0.10960462877957132,f1_macro,0.10646697919791322,0.02998370291409835,0.10646697919791322,0.09648921325787285,True,oct_signed_log_4_r3
+oct_composite_sum_13_r4,95.0,True,0.7737948894500732,0.05626532723688283,f1_macro,0.022957167677821057,0.024064865556200285,0.022957167677821057,-0.01433289936169957,False,oct_composite_sum_13_r4
+__all_generated__,,,,,f1_macro,0.4283256843544073,0.012430832005000553,,0.22236201215548435,True,oct_simple_difference_5_r1 | oct_composite_sum_0_r2 | oct_signed_log_4_r3 | oct_composite_sum_13_r4

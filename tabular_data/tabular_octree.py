@@ -7,6 +7,7 @@ from __future__ import annotations
 整体思路保留 test_advanced / test_final 的闭环，只是整理成 Flask 可以调用的函数。
 """
 
+import ast
 import json
 import math
 from pathlib import Path
@@ -15,33 +16,33 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
-from sklearn.datasets import load_wine
-from sklearn.metrics import accuracy_score, f1_score, log_loss, mean_squared_error, roc_auc_score
-from sklearn.model_selection import KFold, StratifiedKFold, cross_val_predict
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, export_text
-from xgboost import XGBClassifier, XGBRegressor, build_info, __version__ as XGBOOST_VERSION
-from xgboost.callback import TrainingCallback
+from xgboost import build_info, __version__ as XGBOOST_VERSION
 
-from config import MAX_ITERATIONS
+from tabular_data.feature_feedback import DEFAULT_CANDIDATES, DEFAULT_ROUNDS, round_feedback
+from tabular_data.feature_explanations import display_values
 from llm_client import LLMClient
 from result_schema import ResultRecord, write_json
 
 from .paths import DATASET_DIR, OUTPUT_DIR
+from .evaluation import (
+    _RequireCudaTraining, accept_candidate, compute_metrics, make_model,
+    metric_improvement, predict_model,
+)
+from .feature_proposals import propose_feature_candidates, print_proposal
+from .ablation import feature_usage
 
 TARGET_CANDIDATES = ["target", "label", "class", "y", "is_phishing", "phishing", "quality"]
 
 
 def get_data() -> pd.DataFrame:
-    """没有上传文件时，优先使用本模块 datasets/sample_tabular.csv，否则使用 sklearn wine。"""
-    sample_path = DATASET_DIR / "sample_tabular.csv"
-    if sample_path.exists():
-        return pd.read_csv(sample_path)
-    data = load_wine(as_frame=True)
-    df = data.frame.copy()
-    if "target" not in df.columns:
-        df["target"] = data.target
-    return df
+    """网页演示：从 Jungle 正式训练集分层抽取 600 行，不读取验证/测试。"""
+    frame = pd.read_csv(DATASET_DIR / "jungle_chess" / "train.csv")
+    if len(frame) > 600:
+        frame, _ = train_test_split(frame, train_size=600, stratify=frame.target, random_state=42)
+    return frame.reset_index(drop=True)
 
 
 def get_data_with_llm(df: pd.DataFrame, target_col: Optional[str] = None) -> Tuple[pd.DataFrame, str, Dict[str, Any]]:
@@ -129,15 +130,18 @@ def generate_domain_knowledge(df: pd.DataFrame, metadata: Dict[str, Any]) -> str
     cols = ", ".join(metadata.get("feature_columns", [])[:20])
     return (
         f"数据共有 {metadata.get('rows')} 行，目标列为 {metadata.get('target_col')}。"
-        f"可用特征包括：{cols}。OCTree 优先尝试比例、差值、平方、交互项等可解释特征。"
+        f"可用特征包括：{cols}。OCTree 检验多列复合、非线性和分段关系，输出假说、公式和验证依据。"
     )
 
 
-def check_feature_robustness(df: pd.DataFrame, feature_code: str) -> Tuple[bool, pd.DataFrame, str, List[str]]:
+def check_feature_robustness(
+    df: pd.DataFrame, feature_code: str, allow_constant: bool = False,
+) -> Tuple[bool, pd.DataFrame, str, List[str]]:
     """执行 LLM 特征代码，并检查所有新增列是否有效。"""
     before = df.copy()
     before_columns = list(before.columns)
-    safe_df = before.copy()
+    # 特征代码无法读取标签，且不能覆盖已有特征或改变样本顺序。
+    safe_df = before.drop(columns=["target"], errors="ignore").copy()
     namespace = {
         "__builtins__": {},
         "df": safe_df,
@@ -146,10 +150,21 @@ def check_feature_robustness(df: pd.DataFrame, feature_code: str) -> Tuple[bool,
         "math": math,
     }
     try:
+        parsed = ast.parse(feature_code)
+        forbidden = {"mean", "median", "std", "var", "sum", "min", "max", "quantile", "rank",
+                     "groupby", "rolling", "expanding", "shift", "diff", "sample", "sort_values"}
+        if any(isinstance(node, ast.Attribute) and node.attr in forbidden for node in ast.walk(parsed)):
+            return False, before, "特征必须逐行计算，不能重新拟合统计量或依赖其他行。", []
         exec(feature_code, namespace, namespace)
     except Exception as exc:
         return False, before, f"特征代码执行失败：{type(exc).__name__}: {exc}", []
 
+    original_features = before.drop(columns=["target"], errors="ignore")
+    if (namespace["df"] is not safe_df or not safe_df.index.equals(before.index)
+            or "target" in safe_df.columns or safe_df.columns.duplicated().any()
+            or not set(original_features.columns).issubset(safe_df.columns)
+            or not safe_df[list(original_features.columns)].equals(original_features)):
+        return False, before, "特征代码不能修改标签、已有特征或样本顺序。", []
     new_columns = [col for col in safe_df.columns if col not in before_columns]
     if not new_columns:
         return False, before, "特征代码没有生成任何新列。", []
@@ -167,65 +182,26 @@ def check_feature_robustness(df: pd.DataFrame, feature_code: str) -> Tuple[bool,
             return False, before, f"新特征 {col} 无法稳定转成数值。", new_columns
         if np.isinf(values.to_numpy()).any():
             return False, before, f"新特征 {col} 存在 Inf，可能有除零风险。", new_columns
-        if values.nunique(dropna=False) <= 1:
+        if not allow_constant and values.nunique(dropna=False) <= 1:
             return False, before, f"新特征 {col} 是常数列。", new_columns
-        for old_col in before_columns:
+        for old_col in ([] if allow_constant else before_columns):
             if old_col == "target":
                 continue
             old_values = pd.to_numeric(before[old_col], errors="coerce")
             if values.reset_index(drop=True).equals(old_values.reset_index(drop=True)):
                 return False, before, f"新特征 {col} 与已有列 {old_col} 完全重复。", new_columns
         safe_df[col] = values
+    if "target" in before:
+        safe_df["target"] = before["target"]
     return True, safe_df, f"通过沙盒检查，新增列：{', '.join(map(str, new_columns))}", new_columns
 
 
-class _RequireCudaTraining(TrainingCallback):
-    """拒绝 XGBoost 在 GPU 不可见时自动切换成 CPU 的训练结果。"""
-
-    def after_training(self, model):
-        device = json.loads(model.save_config())["learner"]["generic_param"]["device"]
-        if not device.startswith("cuda"):
-            raise RuntimeError("XGBoost 未在 GPU 上训练，请检查 CUDA 12 安装包和显卡可见性。")
-        return model
-
-
 def _classification_model(n_classes: int):
-    return XGBClassifier(
-        n_estimators=60,
-        max_depth=3,
-        learning_rate=0.08,
-        subsample=0.9,
-        colsample_bytree=0.9,
-        eval_metric="mlogloss" if n_classes > 2 else "logloss",
-        random_state=42,
-        device="cuda:0",
-        tree_method="hist",
-        callbacks=[_RequireCudaTraining()],
-    )
+    return make_model("classification", n_classes)
 
 
 def _regression_model():
-    return XGBRegressor(
-        n_estimators=60, max_depth=3, learning_rate=0.08, random_state=42,
-        device="cuda:0", tree_method="hist", callbacks=[_RequireCudaTraining()],
-    )
-
-
-def _safe_auc(y_true: np.ndarray, proba: np.ndarray) -> Optional[float]:
-    try:
-        classes = np.unique(y_true)
-        if len(classes) == 2:
-            return float(roc_auc_score(y_true, proba[:, 1]))
-        return float(roc_auc_score(y_true, proba, multi_class="ovr"))
-    except Exception:
-        return None
-
-
-def _safe_log_loss(y_true: np.ndarray, proba: np.ndarray) -> Optional[float]:
-    try:
-        return float(log_loss(y_true, proba, labels=np.unique(y_true)))
-    except Exception:
-        return None
+    return make_model("regression")
 
 
 def evaluate_and_reason(
@@ -255,28 +231,23 @@ def evaluate_and_reason(
         cv = KFold(n_splits=folds, shuffle=True, random_state=42)
         model = _regression_model()
 
-    pred = cross_val_predict(clone(model), X, y, cv=cv, method="predict")
-    if is_classification:
-        proba = cross_val_predict(clone(model), X, y, cv=cv, method="predict_proba")
-        metrics = {
-            "accuracy": float(accuracy_score(y, pred)),
-            "auc": _safe_auc(y, proba),
-            "f1": float(f1_score(y, pred, average="weighted", zero_division=0)),
-            "log_loss": _safe_log_loss(y, proba),
-            "mse": float(mean_squared_error(y, pred)),
-        }
-        tree = DecisionTreeClassifier(max_depth=3, random_state=42)
-        tree.fit(X, y)
-    else:
-        metrics = {
-            "accuracy": None,
-            "auc": None,
-            "f1": None,
-            "log_loss": None,
-            "mse": float(mean_squared_error(y, pred)),
-        }
-        tree = DecisionTreeRegressor(max_depth=3, random_state=42)
-        tree.fit(X, y)
+    pred = np.empty(len(y), dtype=float)
+    # 保持 XGBoost 概率的 float32 精度，避免 sklearn 按 float64 精度误报归一化警告。
+    proba = np.empty((len(y), n_classes), dtype=np.float32) if is_classification else None
+    usage = {col: {"split_count": 0, "total_gain": 0.0, "used_by_xgboost": False} for col in X}
+    for train_ids, validation_ids in cv.split(X, y):
+        fitted = clone(model).fit(X.iloc[train_ids], y[train_ids])
+        for col, item in feature_usage(fitted, list(X.columns)).items():
+            usage[col]["split_count"] += item["split_count"]
+            usage[col]["total_gain"] += item["total_gain"]
+            usage[col]["used_by_xgboost"] |= item["used_by_xgboost"]
+        fold_pred, fold_proba = predict_model(fitted, X.iloc[validation_ids], task_type)
+        pred[validation_ids] = fold_pred
+        if proba is not None:
+            proba[validation_ids] = fold_proba
+    metrics = compute_metrics(y, pred, proba, task_type)
+    tree = (DecisionTreeClassifier if is_classification else DecisionTreeRegressor)(max_depth=3, random_state=42)
+    tree.fit(X, y)
 
     try:
         cart_rules = export_text(tree, feature_names=list(X.columns))
@@ -284,54 +255,88 @@ def evaluate_and_reason(
         cart_rules = "决策树规则导出失败。"
     return {
         "metrics": metrics, "cart_rules": cart_rules, "feature_names": list(X.columns),
-        "model_backend": backend, "device": "cuda:0",
+        "model_backend": backend, "device": "cuda:0", "feature_usage": usage,
     }
 
 
 def _metric_improvement(baseline: Dict[str, Any], optimized: Dict[str, Any]) -> Dict[str, Any]:
-    improvement: Dict[str, Any] = {}
-    for key in ["accuracy", "auc", "f1"]:
-        b, o = baseline.get(key), optimized.get(key)
-        improvement[key] = None if b is None or o is None else float(o - b)
-    for key in ["log_loss", "mse"]:
-        b, o = baseline.get(key), optimized.get(key)
-        improvement[key] = None if b is None or o is None else float(b - o)
-    return improvement
+    return metric_improvement(baseline, optimized)
 
 
-def get_strategy(history_log: List[str], baseline_metrics: Dict[str, Any]) -> str:
-    if not history_log:
-        return "首轮优先生成简单、可解释、低风险的比例或交互特征。"
-    return "根据上一轮沙盒和模型反馈，避免常数列、重复列和除零，优先生成能改变树分裂的数值特征。"
-
-
-def ask_llm_for_feature(
-    llm_client: LLMClient,
-    df: pd.DataFrame,
-    metadata: Dict[str, Any],
-    history_log: List[str],
-) -> str:
-    """调用统一 LLMClient，失败时自动走 mock。"""
-    return llm_client.generate_feature_code(
-        columns=[col for col in df.columns if col != "target"],
-        stats=dataframe_stats(df),
-        history=history_log + [generate_domain_knowledge(df, metadata)],
+def evaluate_feature_round(
+    train, validation, evaluate, current_metrics, task_type, client, round_index, history, seen,
+    *, candidate_count=DEFAULT_CANDIDATES, feature_mode="reasoned", eligible_columns=None, guidance=None,
+):
+    """OCTree 共用节点：提出可解释候选→检查→XGBoost 验证→保留最佳可接受分支。"""
+    proposals = propose_feature_candidates(
+        train, client, round_index, history, seen, count=candidate_count, mode=feature_mode,
+        eligible_columns=eligible_columns, task_type=task_type, guidance=guidance,
     )
-
-
-def _is_better(baseline: Dict[str, Any], candidate: Dict[str, Any], task_type: str) -> bool:
-    improvement = _metric_improvement(baseline, candidate)
-    if task_type == "classification":
-        gains = [improvement.get("accuracy"), improvement.get("f1"), improvement.get("auc"), improvement.get("log_loss"), improvement.get("mse")]
-        return any(g is not None and g > 0.0001 for g in gains)
-    mse_gain = improvement.get("mse")
-    return mse_gain is not None and mse_gain > 0.0001
+    evaluated, candidates = [], []
+    primary = "f1_macro" if task_type == "classification" else "mse"
+    for index, proposal in enumerate(proposals, 1):
+        seen.add(proposal.signature)
+        print_proposal(proposal, round_index, index)
+        valid, candidate_train, reason, new_columns = check_feature_robustness(train, proposal.code)
+        candidate_validation, report, metrics, usage, passes = None, None, None, {}, False
+        if valid and new_columns != [proposal.name]:
+            valid, reason = False, "每个候选必须恰好创建其声明的一列。"
+        if valid and validation is not None:
+            valid, candidate_validation, validation_reason, validation_columns = check_feature_robustness(
+                validation, proposal.code, allow_constant=True)
+            if not valid or validation_columns != new_columns:
+                valid, reason = False, f"验证集特征变换失败：{validation_reason}"
+        if valid:
+            report = evaluate(candidate_train, candidate_validation)
+            metrics = report["metrics"]
+            passes, decision = accept_candidate(current_metrics, metrics, task_type)
+            if passes:
+                decision = decision.replace("接受：", "符合接受条件，待本轮候选比较：", 1)
+            reason += "\n" + decision
+            if report.get("model") is not None:
+                usage = feature_usage(report["model"], new_columns)
+            else:
+                usage = {col: report.get("feature_usage", {}).get(col, {}) for col in new_columns}
+        candidate = {"proposal": proposal.to_dict(), "feature_code": proposal.code, "new_columns": new_columns,
+                     "valid": valid, "passes_metric_guard": passes, "accepted": False, "reason": reason,
+                     "metrics": metrics, "model_usage": usage}
+        candidates.append(candidate)
+        evaluated.append((proposal, candidate_train, candidate_validation, report))
+        if metrics is not None:
+            print(f"    候选评估指标：{display_values(metrics)}", flush=True)
+        print(f"    候选检查：{reason.splitlines()[-1]}；XGBoost 使用：{display_values(usage)}", flush=True)
+    eligible = [i for i, row in enumerate(candidates) if row["passes_metric_guard"]]
+    best = (max(eligible, key=lambda i: candidates[i]["metrics"][primary]) if task_type == "classification" else
+            min(eligible, key=lambda i: candidates[i]["metrics"][primary])) if eligible else None
+    selected = None
+    next_train, next_validation, selected_report, after = train, validation, None, current_metrics.copy()
+    if best is not None:
+        candidates[best]["accepted"] = True
+        selected, next_train, next_validation, selected_report = evaluated[best]
+        after = candidates[best]["metrics"].copy()
+        for index in eligible:
+            if index != best:
+                candidates[index]["reason"] += "\n本轮另一个可接受候选的主指标更优，故未保留。"
+    representative = candidates[best] if best is not None else (candidates[0] if candidates else {})
+    reason = representative.get("reason", "候选库已耗尽，未产生新特征。")
+    iteration = {"round": round_index, "model_backend": "xgboost", "evaluation_split": "validation" if validation is not None else "cross_validation_demo",
+                 "accepted": best is not None, "valid": representative.get("valid", False),
+                 "feature_code": representative.get("feature_code", ""), "new_columns": representative.get("new_columns", []),
+                 "explanation": representative.get("proposal", {}), "reason": reason,
+                 "metrics_before": current_metrics.copy(), "metrics": representative.get("metrics") or current_metrics.copy(),
+                 "metrics_after": after, "candidates": candidates, "feedback": reason}
+    iteration["learning_feedback"] = round_feedback(iteration, task_type)
+    if guidance is not None:
+        from .model_guidance import public_guidance
+        iteration["training_model_guidance"] = public_guidance(guidance)
+    print(f"  第 {round_index} 轮结论：" + (f"接受 {selected.name}" if selected else "未接受新特征"), flush=True)
+    return next_train, next_validation, selected_report, selected, iteration
 
 
 def run_octree_analysis(
     df: Optional[pd.DataFrame] = None,
     target_col: Optional[str] = None,
-    max_iterations: int = MAX_ITERATIONS,
+    max_iterations: int = DEFAULT_ROUNDS,
     llm_client: Optional[LLMClient] = None,
     save_outputs: bool = True,
 ) -> Dict[str, Any]:
@@ -352,49 +357,30 @@ def run_octree_analysis(
     current_df = processed.copy()
     best_metrics = baseline_metrics.copy()
     history_log: List[str] = []
+    learning_history = []
     iterations: List[Dict[str, Any]] = []
     accepted_features: List[str] = []
     generated_rules: List[str] = []
+    seen = set()
 
+    from .model_guidance import build_guidance
     for round_idx in range(1, max_iterations + 1):
-        metrics_before = best_metrics.copy()
-        strategy = get_strategy(history_log, baseline_metrics)
-        feature_code = ask_llm_for_feature(llm_client, current_df, metadata, history_log)
-        generated_rules.append(feature_code)
-        valid, candidate_df, sandbox_reason, new_cols = check_feature_robustness(current_df, feature_code)
-        accepted = False
-        candidate_metrics: Dict[str, Any] = best_metrics.copy()
-        cart_feedback = sandbox_reason
-        if valid:
-            candidate_report = evaluate_and_reason(candidate_df, task_type=task_type, model_backend=model_backend)
-            candidate_metrics = candidate_report["metrics"]
-            accepted = _is_better(best_metrics, candidate_metrics, task_type)
-            cart_feedback = f"{sandbox_reason}\n决策树反馈：\n{candidate_report['cart_rules'][:1200]}"
-            if accepted:
-                current_df = candidate_df
-                best_metrics = candidate_metrics
-                accepted_features.extend(new_cols)
-        feedback = (
-            f"第 {round_idx} 轮策略：{strategy}\n"
-            f"沙盒结果：{sandbox_reason}\n"
-            f"是否接受：{'是' if accepted else '否'}"
-        )
-        history_log.append(feedback)
-        iterations.append(
-            {
-                "round": round_idx,
-                "model_backend": model_backend,
-                "feature_code": feature_code,
-                "new_columns": new_cols,
-                "valid": valid,
-                "accepted": accepted,
-                "reason": sandbox_reason,
-                "metrics": candidate_metrics,
-                "metrics_before": metrics_before,
-                "metrics_after": best_metrics.copy(),
-                "feedback": cart_feedback,
-            }
-        )
+        features = current_df.drop(columns="target")
+        fitted = make_model(task_type, n_classes=current_df.target.nunique()).fit(features, current_df.target)
+        predictions, probabilities = predict_model(fitted, features, task_type)
+        guidance = build_guidance(current_df, list(features), predictions=predictions,
+                                  probabilities=probabilities, task_type=task_type, round_index=round_idx)
+        def evaluate(candidate_train, unused):
+            return evaluate_and_reason(candidate_train, task_type=task_type, model_backend=model_backend)
+        current_df, _, _, selected, iteration = evaluate_feature_round(
+            current_df, None, evaluate, best_metrics, task_type, llm_client, round_idx, learning_history, seen, guidance=guidance)
+        best_metrics = iteration["metrics_after"].copy()
+        if selected:
+            accepted_features.append(selected.name)
+        generated_rules.extend(row["feature_code"] for row in iteration["candidates"])
+        history_log.append(f"第 {round_idx} 轮：{iteration['reason']}；指标：{display_values(best_metrics)}")
+        learning_history.append(iteration["learning_feedback"])
+        iterations.append(iteration)
 
     optimized_report = evaluate_and_reason(current_df, task_type=task_type, model_backend=model_backend)
     optimized_metrics = optimized_report["metrics"]

@@ -60,11 +60,6 @@ class LLMClient:
         except Exception as exc:
             raise LLMError(str(exc)) from exc
 
-    def generate_feature_code(self, columns: List[str], stats: Dict[str, Any], history: List[str]) -> str:
-        """保留共享客户端接口，表格专用实现位于 tabular_data。"""
-        from tabular_data.feature_generation import generate_feature_code
-
-        return generate_feature_code(self, columns, stats, history)
 
     def recover_math_node(
         self,
@@ -135,11 +130,6 @@ def strip_code_fence(text: str) -> str:
     return text
 
 
-def mock_feature_code(columns: List[str], history: List[str] | None = None) -> str:
-    """兼容旧导入；表格回退规则统一保存在 tabular_data。"""
-    from tabular_data.feature_generation import mock_feature_code as generate_mock
-
-    return generate_mock(columns, history)
 
 
 def mock_code_solution(prompt: str, starter_code: str) -> str:

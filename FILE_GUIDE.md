@@ -74,10 +74,10 @@ Tabular、Math、Code 都通过它调用模型。真实 API 失败时会自动 f
 表格 OCTree 主线与数据集的统一目录：
 
 - `tabular_octree.py`：原根目录表格主流程，导入路径为 `tabular_data.tabular_octree`。
-- `feature_generation.py`：LLM 表格特征生成提示词及离线回退规则。
+- `feature_proposals.py`：当前 reasoned 特征生成及结构化解释；`feature_generation.py` 仅保留离线客户端计数。
 - `web.js`：统一表格上传、模拟测试和结果展示，兼容分类与回归指标。
 - `paths.py`：表格专用数据、上传文件及输出路径，可用 `TABULAR_DATASET_DIR`、`TABULAR_UPLOAD_DIR`、`TABULAR_OUTPUT_DIR` 配置。
-- `datasets/sample_tabular.csv`：从原 `sample_data/` 移入的表格样例。
+- `datasets/`：Jungle Chess、Balance Scale、Chess KRK 三个多分类数据集，统一 20/40/40 分层划分；网页从 Jungle 训练集抽样。
 - `uploads/`：表格上传文件，上传时自动创建。
 - `outputs/`：表格运行结果，保存时自动创建。
 

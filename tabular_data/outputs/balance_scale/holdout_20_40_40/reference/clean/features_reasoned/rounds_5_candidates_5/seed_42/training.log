@@ -1,0 +1,1013 @@
+训练版本：multiclass_reasoned_v7
+开始时间：2026-10-03T07:05:56.013465+00:00
+结果目录：/home/asus/OPD/-OPD/tabular_data/outputs/balance_scale/holdout_20_40_40/reference/clean/features_reasoned/rounds_5_candidates_5/seed_42
+完整日志：/home/asus/OPD/-OPD/tabular_data/outputs/balance_scale/holdout_20_40_40/reference/clean/features_reasoned/rounds_5_candidates_5/seed_42/training.log
+类别分布校验通过：按原始类别比例分层；允许每类至多 2 条样本的取整误差。
+  train: B=10 (8.00%)；L=57 (45.60%)；R=58 (46.40%)
+  validation: B=19 (7.60%)；L=116 (46.40%)；R=115 (46.00%)
+  test: B=20 (8.00%)；L=115 (46.00%)；R=115 (46.00%)
+实验视图：full，使用 4/4 列；训练预算 125/125，实际类别数量 {'B': 10, 'L': 57, 'R': 58}。
+开始训练：balance_scale，train=125，validation=250，test=250；GPU reference，reasoned 特征 5 轮、每轮 5 个候选，clean。
+基线验证指标：{'accuracy': '0.884', 'balanced_accuracy': '0.6524', 'f1': '0.8574', 'f1_macro': '0.6439', 'auc': '0.8961', 'log_loss': '0.4336'}
+
+阶段：特征生成与验证，第 1/5 轮。
+训练 CART 分支（仅作生成依据）：
+|--- left-distance <= 2.5000
+|   |--- right-distance <= 1.5000
+|   |   |--- class: 1
+|   |--- right-distance >  1.5000
+|   |   |--- right-weight <= 1.5000
+|   |   |   |--- class: 2
+|   |   |--- right-weight >  1.5000
+|   |   |   |--- right-distance <= 3.5000
+|   |   |   |   |--- class: 2
+|   |   |   |--- right-distance >  3.5000
+|   |   |   |   |--- class: 2
+|--- left-distance >  2.5000
+|   |--- right-distance <= 2.5000
+|   |   |--- right-distance <= 1.5000
+|   |   |   |--- class: 1
+|   |   |--- right-distance >  1.5000
+|   |   |   |--- left-weight <= 3.5000
+|   |   |   |   |--- class: 1
+|   |   |   |--- left-weight >  3.5000
+|   |   |   |   |--- class: 1
+|   |--- right-distance >  2.5000
+|   |   |--- right-weight <= 2.5000
+|   |   |   |--- left-weight <= 2.5000
+|   |   |   |   |--- class: 0
+|   |   |   |--- left-weight >  2.5000
+|   |   |   |   |--- class: 1
+|   |   |--- right-weight >  2.5000
+|   |   |   |--- left-weight <= 4.5000
+|   |   |   |   |--- class: 2
+|   |   |   |--- left-weight >  4.5000
+|   |   |   |   |--- class: 1
+
+当前 XGBoost 训练类别诊断：[{'class': 0, 'rows': 10, 'recall': '0.5'}, {'class': 1, 'rows': 57, 'recall': '1'}, {'class': 2, 'rows': 58, 'recall': '0.9828'}]
+  第 1 轮候选 1 [piecewise/cart_rule] oct_cart_leaf_17_r1
+    依据列：left-distance, right-distance, right-weight, left-weight
+    训练集依据：left-distance: MI=0.1183, 中位数=3, 偏度=-0.0415；right-distance: MI=0.1669, 中位数=3, 偏度=-0.108；right-weight: MI=0.0519, 中位数=3, 偏度=-0.0836；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.2993，分母=13.2329，score=0.0226，分组数=2；仅训练内启发式，仍须通过验证。
+    列间 Spearman：left-distance / right-distance=-0.1041；left-distance / right-weight=-0.0569；left-distance / left-weight=-0.0422；right-distance / right-weight=0.0762；right-distance / left-weight=0.0468；right-weight / left-weight=0.0817
+    历史反馈调整：首轮依据训练统计与领域公式探索。
+    关系假说：训练决策树中多个条件共同出现的子群，可能需要一个联合指示列才能被浅层 XGBoost 表达。
+    提取方式：将 CART 根节点到叶 17 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 13，阈值逐项保留训练来源。
+    可读公式：np.where((df['left-distance'] > cart_r1_node0) & (df['right-distance'] > cart_r1_node8) & (df['right-weight'] <= cart_r1_node14) & (df['left-weight'] > cart_r1_node15), 1, 0)
+    参数 cart_r1_node15 ≈ 2.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 19 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 2 和 3。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r1_node14 ≈ 2.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 47 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 2 和 3。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r1_node0 ≈ 2.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 125 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 2 和 3。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r1_node8 ≈ 2.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 78 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 2 和 3。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 0 ≈ 0 [预先规定的数学或数值规则]：零基准：作为分段判断/空历史输出或非负裁剪下界；由表达式所在分支决定，不从数据拟合。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：将 CART 根节点到叶 17 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 13，阈值逐项保留训练来源。
+      u1 = df['left-distance'] > cart_r1_node0
+      u2 = df['right-distance'] > cart_r1_node8
+      u3 = u1 & u2
+      u4 = df['right-weight'] <= cart_r1_node14
+      u5 = u3 & u4
+      u6 = df['left-weight'] > cart_r1_node15
+      u7 = u5 & u6
+      u8 = np.where(u7, 1, 0)
+      新列 = u8；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.892', 'balanced_accuracy': '0.6582', 'f1': '0.8626', 'f1_macro': '0.6502', 'auc': '0.9096', 'log_loss': '0.4173'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0063，其余可用指标均未退化。；XGBoost 使用：{'oct_cart_leaf_17_r1': {'split_count': 57, 'used_by_xgboost': True, 'gain': '2.6502', 'total_gain': '151.0591', 'total_gain_fraction': '0.1402'}}
+  第 1 轮候选 2 [multicolumn/local_template] oct_composite_sum_2_r1
+    依据列：right-distance, right-weight, left-weight
+    训练集依据：right-distance: MI=0.1669, 中位数=3, 偏度=-0.108；right-weight: MI=0.0519, 中位数=3, 偏度=-0.0836；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=1.0834，分母=13.2329，score=0.0819，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-distance / right-weight=0.0762；right-distance / left-weight=0.0468；right-weight / left-weight=0.0817
+    历史反馈调整：首轮依据训练统计与领域公式探索。
+    关系假说：前两列的联合水平可能比乘性交互稳定，第三列调节其幅度。
+    提取方式：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+    可读公式：((df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365 + (df['right-weight'] - median_col_72696768742d776569676874) / scale_col_72696768742d776569676874) / (1 + np.abs((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874))
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_72696768742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=389/125=3.112；总体标准差 σ=√(Σ(x−μ)²/n)=√(256.432/125)=1.4323（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+      u1 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u2 = u1 / scale_col_72696768742d64697374616e6365
+      u3 = df['right-weight'] - median_col_72696768742d776569676874
+      u4 = u3 / scale_col_72696768742d776569676874
+      u5 = u2 + u4
+      u6 = df['left-weight'] - median_col_6c6566742d776569676874
+      u7 = u6 / scale_col_6c6566742d776569676874
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.872', 'balanced_accuracy': '0.6438', 'f1': '0.8459', 'f1_macro': '0.6356', 'auc': '0.8942', 'log_loss': '0.4147'}
+    候选检查：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；XGBoost 使用：{'oct_composite_sum_2_r1': {'split_count': 276, 'used_by_xgboost': True, 'gain': '1.7397', 'total_gain': '480.1663', 'total_gain_fraction': '0.4169'}}
+  第 1 轮候选 3 [nonlinear/local_template] oct_simple_difference_5_r1
+    依据列：right-weight, left-weight
+    训练集依据：right-weight: MI=0.0519, 中位数=3, 偏度=-0.0836；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=1.9209，分母=13.2329，score=0.1452，分组数=6；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-weight / left-weight=0.0817
+    历史反馈调整：首轮依据训练统计与领域公式探索。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['right-weight'] - df['left-weight']
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['right-weight'] - df['left-weight']
+      新列 = u1；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.892', 'balanced_accuracy': '0.7315', 'f1': '0.8836', 'f1_macro': '0.749', 'auc': '0.906', 'log_loss': '0.3916'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。；XGBoost 使用：{'oct_simple_difference_5_r1': {'split_count': 283, 'used_by_xgboost': True, 'gain': '1.6822', 'total_gain': '476.0587', 'total_gain_fraction': '0.3972'}}
+  第 1 轮候选 4 [nonlinear/local_template] oct_simple_ratio_5_r1
+    依据列：right-weight, left-weight
+    训练集依据：right-weight: MI=0.0519, 中位数=3, 偏度=-0.0836；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=1.8739，分母=13.2329，score=0.1416，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-weight / left-weight=0.0817
+    历史反馈调整：首轮依据训练统计与领域公式探索。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['right-weight'] / (np.abs(df['left-weight']) + 1e-06)
+    参数 1.00e-06 ≈ 1.00e-06 [预先规定的数学或数值规则]：固定数值保护 ε=10⁻⁶=0.000001，避免零分母或 log(0)；工程设定，未通过验证/测试调参。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = np.abs(df['left-weight'])
+      u2 = u1 + 1e-06
+      u3 = df['right-weight'] / u2
+      新列 = u3；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.876', 'balanced_accuracy': '0.7199', 'f1': '0.8671', 'f1_macro': '0.7409', 'auc': '0.8929', 'log_loss': '0.4191'}
+    候选检查：拒绝：accuracy 退化（0.884 → 0.876；改善量 -0.008）。；XGBoost 使用：{'oct_simple_ratio_5_r1': {'split_count': 344, 'used_by_xgboost': True, 'gain': '1.6119', 'total_gain': '554.4808', 'total_gain_fraction': '0.4549'}}
+  第 1 轮候选 5 [nonlinear/local_template] oct_simple_difference_0_r1
+    依据列：right-distance, left-distance
+    训练集依据：right-distance: MI=0.1669, 中位数=3, 偏度=-0.108；left-distance: MI=0.1183, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=1.4342，分母=13.2329，score=0.1084，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-distance / left-distance=-0.1041
+    历史反馈调整：首轮依据训练统计与领域公式探索。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['right-distance'] - df['left-distance']
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['right-distance'] - df['left-distance']
+      新列 = u1；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.852', 'balanced_accuracy': '0.688', 'f1': '0.8415', 'f1_macro': '0.7066', 'auc': '0.8967', 'log_loss': '0.4267'}
+    候选检查：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；XGBoost 使用：{'oct_simple_difference_0_r1': {'split_count': 231, 'used_by_xgboost': True, 'gain': '2.652', 'total_gain': '612.611', 'total_gain_fraction': '0.5248'}}
+  第 1 轮结论：接受 oct_simple_difference_5_r1
+
+阶段：特征生成与验证，第 2/5 轮。
+训练 CART 分支（仅作生成依据）：
+|--- oct_simple_difference_5_r1 <= 1.5000
+|   |--- left-distance <= 1.5000
+|   |   |--- oct_simple_difference_5_r1 <= -2.0000
+|   |   |   |--- class: 2
+|   |   |--- oct_simple_difference_5_r1 >  -2.0000
+|   |   |   |--- right-distance <= 3.5000
+|   |   |   |   |--- class: 2
+|   |   |   |--- right-distance >  3.5000
+|   |   |   |   |--- class: 2
+|   |--- left-distance >  1.5000
+|   |   |--- right-distance <= 3.5000
+|   |   |   |--- right-distance <= 2.5000
+|   |   |   |   |--- class: 1
+|   |   |   |--- right-distance >  2.5000
+|   |   |   |   |--- class: 1
+|   |   |--- right-distance >  3.5000
+|   |   |   |--- oct_simple_difference_5_r1 <= -1.5000
+|   |   |   |   |--- class: 1
+|   |   |   |--- oct_simple_difference_5_r1 >  -1.5000
+|   |   |   |   |--- class: 2
+|--- oct_simple_difference_5_r1 >  1.5000
+|   |--- left-distance <= 4.5000
+|   |   |--- class: 2
+|   |--- left-distance >  4.5000
+|   |   |--- class: 2
+
+当前 XGBoost 训练类别诊断：[{'class': 0, 'rows': 10, 'recall': '0.7'}, {'class': 1, 'rows': 57, 'recall': '1'}, {'class': 2, 'rows': 58, 'recall': '1'}]
+  第 2 轮候选 1 [piecewise/cart_rule] oct_cart_leaf_9_r2
+    依据列：oct_simple_difference_5_r1, left-distance, right-distance
+    训练集依据：oct_simple_difference_5_r1: MI=0.2335, 中位数=0, 偏度=-0.0186；left-distance: MI=0.1343, 中位数=3, 偏度=-0.0415；right-distance: MI=0.1592, 中位数=3, 偏度=-0.108
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.2776，分母=8.6448，score=0.0321，分组数=2；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_simple_difference_5_r1 / left-distance=-0.0187；oct_simple_difference_5_r1 / right-distance=0.023；left-distance / right-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。
+    关系假说：训练决策树中多个条件共同出现的子群，可能需要一个联合指示列才能被浅层 XGBoost 表达。
+    提取方式：将 CART 根节点到叶 9 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 33，阈值逐项保留训练来源。
+    可读公式：np.where((df['oct_simple_difference_5_r1'] <= cart_r2_node0) & (df['left-distance'] > cart_r2_node1) & (df['right-distance'] <= cart_r2_node7) & (df['right-distance'] <= cart_r2_node8), 1, 0)
+    参数 cart_r2_node8 ≈ 2.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 49 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 2 和 3。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r2_node7 ≈ 3.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 78 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 3 和 4。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r2_node0 ≈ 1.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 125 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 1 和 2。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r2_node1 ≈ 1.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 97 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 1 和 2。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 0 ≈ 0 [预先规定的数学或数值规则]：零基准：作为分段判断/空历史输出或非负裁剪下界；由表达式所在分支决定，不从数据拟合。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：将 CART 根节点到叶 9 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 33，阈值逐项保留训练来源。
+      u1 = df['oct_simple_difference_5_r1'] <= cart_r2_node0
+      u2 = df['left-distance'] > cart_r2_node1
+      u3 = u1 & u2
+      u4 = df['right-distance'] <= cart_r2_node7
+      u5 = u3 & u4
+      u6 = df['right-distance'] <= cart_r2_node8
+      u7 = u5 & u6
+      u8 = np.where(u7, 1, 0)
+      新列 = u8；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.872', 'balanced_accuracy': '0.7172', 'f1': '0.8639', 'f1_macro': '0.7347', 'auc': '0.9063', 'log_loss': '0.395'}
+    候选检查：拒绝：accuracy 退化（0.892 → 0.872；改善量 -0.02）。；XGBoost 使用：{'oct_cart_leaf_9_r2': {'split_count': 60, 'used_by_xgboost': True, 'gain': '5.1721', 'total_gain': '310.3248', 'total_gain_fraction': '0.2548'}}
+  第 2 轮候选 2 [multicolumn/local_template] oct_composite_sum_0_r2
+    依据列：oct_simple_difference_5_r1, right-distance, left-distance
+    训练集依据：oct_simple_difference_5_r1: MI=0.2335, 中位数=0, 偏度=-0.0186；right-distance: MI=0.1592, 中位数=3, 偏度=-0.108；left-distance: MI=0.1343, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.6507，分母=8.6448，score=0.0753，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_simple_difference_5_r1 / right-distance=0.023；oct_simple_difference_5_r1 / left-distance=-0.0187；right-distance / left-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。
+    关系假说：前两列的联合水平可能比乘性交互稳定，第三列调节其幅度。
+    提取方式：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+    可读公式：((df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1) / scale_oct_simple_difference_5_r1 + (df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365) / (1 + np.abs((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365))
+    参数 scale_oct_simple_difference_5_r1 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-1、x[31]=-1；线性插值 Q=(1−0)×-1+0×-1=-1。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=1、x[93]=1；线性插值 Q=(1−0)×1+0×1=1。 IQR=Q75−Q25=1−-1=2；均值 μ=Σx/n=6/125=0.048；总体标准差 σ=√(Σ(x−μ)²/n)=√(437.712/125)=1.8713（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_simple_difference_5_r1 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+      u1 = df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1
+      u2 = u1 / scale_oct_simple_difference_5_r1
+      u3 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u4 = u3 / scale_col_72696768742d64697374616e6365
+      u5 = u2 + u4
+      u6 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u7 = u6 / scale_col_6c6566742d64697374616e6365
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.896', 'balanced_accuracy': '0.7491', 'f1': '0.8881', 'f1_macro': '0.7752', 'auc': '0.9077', 'log_loss': '0.3607'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0263，其余可用指标均未退化。；XGBoost 使用：{'oct_composite_sum_0_r2': {'split_count': 258, 'used_by_xgboost': True, 'gain': '2.7347', 'total_gain': '705.5461', 'total_gain_fraction': '0.552'}}
+  第 2 轮候选 3 [nonlinear/local_template] oct_simple_ratio_4_r2
+    依据列：right-distance, left-distance
+    训练集依据：right-distance: MI=0.1592, 中位数=3, 偏度=-0.108；left-distance: MI=0.1343, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=1.1222，分母=8.6448，score=0.1298，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-distance / left-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['right-distance'] / (np.abs(df['left-distance']) + 1e-06)
+    参数 1.00e-06 ≈ 1.00e-06 [预先规定的数学或数值规则]：固定数值保护 ε=10⁻⁶=0.000001，避免零分母或 log(0)；工程设定，未通过验证/测试调参。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = np.abs(df['left-distance'])
+      u2 = u1 + 1e-06
+      u3 = df['right-distance'] / u2
+      新列 = u3；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.88', 'balanced_accuracy': '0.7523', 'f1': '0.8738', 'f1_macro': '0.779', 'auc': '0.9184', 'log_loss': '0.3496'}
+    候选检查：拒绝：accuracy 退化（0.892 → 0.88；改善量 -0.012）。；XGBoost 使用：{'oct_simple_ratio_4_r2': {'split_count': 376, 'used_by_xgboost': True, 'gain': '1.9204', 'total_gain': '722.0878', 'total_gain_fraction': '0.5342'}}
+  第 2 轮候选 4 [nonlinear/local_template] oct_simple_difference_7_r2
+    依据列：left-distance, right-weight
+    训练集依据：left-distance: MI=0.1343, 中位数=3, 偏度=-0.0415；right-weight: MI=0.1017, 中位数=3, 偏度=-0.0836
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.7125，分母=8.6448，score=0.0824，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：left-distance / right-weight=-0.0569
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['left-distance'] - df['right-weight']
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['left-distance'] - df['right-weight']
+      新列 = u1；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.864', 'balanced_accuracy': '0.682', 'f1': '0.8511', 'f1_macro': '0.6966', 'auc': '0.9308', 'log_loss': '0.372'}
+    候选检查：拒绝：accuracy 退化（0.892 → 0.864；改善量 -0.028）。；XGBoost 使用：{'oct_simple_difference_7_r2': {'split_count': 106, 'used_by_xgboost': True, 'gain': '3.3084', 'total_gain': '350.6892', 'total_gain_fraction': '0.2857'}}
+  第 2 轮候选 5 [piecewise/local_template] oct_piecewise_0_median_r2
+    依据列：oct_simple_difference_5_r1, right-distance, left-distance
+    训练集依据：oct_simple_difference_5_r1: MI=0.2335, 中位数=0, 偏度=-0.0186；right-distance: MI=0.1592, 中位数=3, 偏度=-0.108；left-distance: MI=0.1343, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.6913，分母=8.6448，score=0.08，分组数=6；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_simple_difference_5_r1 / right-distance=0.023；oct_simple_difference_5_r1 / left-distance=-0.0187；right-distance / left-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。
+    关系假说：第三列可能在不同条件区间表现为增强或抑制关系，分段特征将该假说交给验证集。
+    提取方式：用 oct_simple_difference_5_r1 的训练集 median 作门槛，低区间计算 z(right-distance)×z(left-distance)，高区间计算 z(right-distance)/(1+|z(left-distance)|)。
+    可读公式：np.where(df['oct_simple_difference_5_r1'] <= median_oct_simple_difference_5_r1, (df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365 * ((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365), (df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365 / (1 + np.abs((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365)))
+    参数 median_oct_simple_difference_5_r1 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：用 oct_simple_difference_5_r1 的训练集 median 作门槛，低区间计算 z(right-distance)×z(left-distance)，高区间计算 z(right-distance)/(1+|z(left-distance)|)。
+      u1 = df['oct_simple_difference_5_r1'] <= median_oct_simple_difference_5_r1
+      u2 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u3 = u2 / scale_col_72696768742d64697374616e6365
+      u4 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u5 = u4 / scale_col_6c6566742d64697374616e6365
+      u6 = u3 * u5
+      u7 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u8 = u7 / scale_col_72696768742d64697374616e6365
+      u9 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u10 = u9 / scale_col_6c6566742d64697374616e6365
+      u11 = np.abs(u10)
+      u12 = 1 + u11
+      u13 = u8 / u12
+      u14 = np.where(u1, u6, u13)
+      新列 = u14；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.9', 'balanced_accuracy': '0.7373', 'f1': '0.8889', 'f1_macro': '0.7699', 'auc': '0.9072', 'log_loss': '0.3734'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0209，其余可用指标均未退化。；XGBoost 使用：{'oct_piecewise_0_median_r2': {'split_count': 147, 'used_by_xgboost': True, 'gain': '0.8397', 'total_gain': '123.4392', 'total_gain_fraction': '0.1005'}}
+  第 2 轮结论：接受 oct_composite_sum_0_r2
+
+阶段：特征生成与验证，第 3/5 轮。
+训练 CART 分支（仅作生成依据）：
+|--- oct_composite_sum_0_r2 <= 0.1389
+|   |--- left-distance <= 1.5000
+|   |   |--- oct_composite_sum_0_r2 <= -0.2917
+|   |   |   |--- class: 2
+|   |   |--- oct_composite_sum_0_r2 >  -0.2917
+|   |   |   |--- class: 2
+|   |--- left-distance >  1.5000
+|   |   |--- left-distance <= 3.5000
+|   |   |   |--- oct_composite_sum_0_r2 <= -0.2778
+|   |   |   |   |--- class: 1
+|   |   |   |--- oct_composite_sum_0_r2 >  -0.2778
+|   |   |   |   |--- class: 0
+|   |   |--- left-distance >  3.5000
+|   |   |   |--- class: 1
+|--- oct_composite_sum_0_r2 >  0.1389
+|   |--- left-distance <= 3.5000
+|   |   |--- class: 2
+|   |--- left-distance >  3.5000
+|   |   |--- oct_composite_sum_0_r2 <= 0.5000
+|   |   |   |--- class: 0
+|   |   |--- oct_composite_sum_0_r2 >  0.5000
+|   |   |   |--- class: 2
+
+当前 XGBoost 训练类别诊断：[{'class': 0, 'rows': 10, 'recall': '0.9'}, {'class': 1, 'rows': 57, 'recall': '1'}, {'class': 2, 'rows': 58, 'recall': '1'}]
+  第 3 轮候选 1 [piecewise/cart_rule] oct_cart_leaf_8_r3
+    依据列：oct_composite_sum_0_r2, left-distance
+    训练集依据：oct_composite_sum_0_r2: MI=0.425, 中位数=0, 偏度=0.2436；left-distance: MI=0.0796, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.353，分母=5.6497，score=0.0625，分组数=2；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / left-distance=-0.0721
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 2 轮 oct_cart_leaf_9_r2：拒绝：accuracy 退化（0.892 → 0.872；改善量 -0.02）。
+    关系假说：训练决策树中多个条件共同出现的子群，可能需要一个联合指示列才能被浅层 XGBoost 表达。
+    提取方式：将 CART 根节点到叶 8 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 7，阈值逐项保留训练来源。
+    可读公式：np.where((df['oct_composite_sum_0_r2'] <= cart_r3_node0) & (df['left-distance'] > cart_r3_node1) & (df['left-distance'] <= cart_r3_node5) & (df['oct_composite_sum_0_r2'] > cart_r3_node6), 1, 0)
+    参数 cart_r3_node6 ≈ -0.2778 [train]：CART 深度上限 4、最小叶样本 5，在本节点 27 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 -0.3333 和 -0.2222。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r3_node5 ≈ 3.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 59 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 3 和 4。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r3_node0 ≈ 0.1389 [train]：CART 深度上限 4、最小叶样本 5，在本节点 125 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 0.1111 和 0.1667。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r3_node1 ≈ 1.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 70 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 1 和 2。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 0 ≈ 0 [预先规定的数学或数值规则]：零基准：作为分段判断/空历史输出或非负裁剪下界；由表达式所在分支决定，不从数据拟合。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：将 CART 根节点到叶 8 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 7，阈值逐项保留训练来源。
+      u1 = df['oct_composite_sum_0_r2'] <= cart_r3_node0
+      u2 = df['left-distance'] > cart_r3_node1
+      u3 = u1 & u2
+      u4 = df['left-distance'] <= cart_r3_node5
+      u5 = u3 & u4
+      u6 = df['oct_composite_sum_0_r2'] > cart_r3_node6
+      u7 = u5 & u6
+      u8 = np.where(u7, 1, 0)
+      新列 = u8；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.888', 'balanced_accuracy': '0.7287', 'f1': '0.8799', 'f1_macro': '0.7462', 'auc': '0.9108', 'log_loss': '0.3417'}
+    候选检查：拒绝：accuracy 退化（0.896 → 0.888；改善量 -0.008）。；XGBoost 使用：{'oct_cart_leaf_8_r3': {'split_count': 96, 'used_by_xgboost': True, 'gain': '0.9738', 'total_gain': '93.4847', 'total_gain_fraction': '0.0723'}}
+  第 3 轮候选 2 [multicolumn/local_template] oct_composite_sum_4_r3
+    依据列：oct_composite_sum_0_r2, right-distance, left-distance
+    训练集依据：oct_composite_sum_0_r2: MI=0.425, 中位数=0, 偏度=0.2436；right-distance: MI=0.1445, 中位数=3, 偏度=-0.108；left-distance: MI=0.0796, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.484，分母=5.6497，score=0.0857，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / right-distance=0.4333；oct_composite_sum_0_r2 / left-distance=-0.0721；right-distance / left-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 2 轮 oct_cart_leaf_9_r2：拒绝：accuracy 退化（0.892 → 0.872；改善量 -0.02）。
+    关系假说：前两列的联合水平可能比乘性交互稳定，第三列调节其幅度。
+    提取方式：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+    可读公式：((df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2 + (df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365) / (1 + np.abs((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365))
+    参数 scale_oct_composite_sum_0_r2 ≈ 0.9167 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.4167、x[31]=-0.4167；线性插值 Q=(1−0)×-0.4167+0×-0.4167=-0.4167。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.5、x[93]=0.5；线性插值 Q=(1−0)×0.5+0×0.5=0.5。 IQR=Q75−Q25=0.5−-0.4167=0.9167；均值 μ=Σx/n=5.6389/125=0.0451；总体标准差 σ=√(Σ(x−μ)²/n)=√(73.2649/125)=0.7656（ddof=0）；scale=max(IQR,σ,ε)=0.9167。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_0_r2 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+      u1 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u2 = u1 / scale_oct_composite_sum_0_r2
+      u3 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u4 = u3 / scale_col_72696768742d64697374616e6365
+      u5 = u2 + u4
+      u6 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u7 = u6 / scale_col_6c6566742d64697374616e6365
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.884', 'balanced_accuracy': '0.7552', 'f1': '0.8791', 'f1_macro': '0.7735', 'auc': '0.9285', 'log_loss': '0.3256'}
+    候选检查：拒绝：accuracy 退化（0.896 → 0.884；改善量 -0.012）。；XGBoost 使用：{'oct_composite_sum_4_r3': {'split_count': 278, 'used_by_xgboost': True, 'gain': '2.5306', 'total_gain': '703.5149', 'total_gain_fraction': '0.5296'}}
+  第 3 轮候选 3 [nonlinear/local_template] oct_signed_log_4_r3
+    依据列：oct_composite_sum_0_r2, right-distance, left-distance
+    训练集依据：oct_composite_sum_0_r2: MI=0.425, 中位数=0, 偏度=0.2436；right-distance: MI=0.1445, 中位数=3, 偏度=-0.108；left-distance: MI=0.0796, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.5559，分母=5.6497，score=0.0984，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / right-distance=0.4333；oct_composite_sum_0_r2 / left-distance=-0.0721；right-distance / left-distance=-0.1041
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。；第 2 轮 oct_cart_leaf_9_r2：拒绝：accuracy 退化（0.892 → 0.872；改善量 -0.02）。
+    关系假说：重尾、饱和和反比例关系可能共同存在，需验证非线性复合是否改善分类。
+    提取方式：oct_composite_sum_0_r2 使用有符号 log1p，right-distance 使用 tanh，left-distance 使用稳定倒数，再相乘。
+    可读公式：np.sign((df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2) * np.log1p(np.abs((df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2)) * np.tanh((df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365) / (1 + np.abs((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365))
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_oct_composite_sum_0_r2 ≈ 0.9167 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.4167、x[31]=-0.4167；线性插值 Q=(1−0)×-0.4167+0×-0.4167=-0.4167。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.5、x[93]=0.5；线性插值 Q=(1−0)×0.5+0×0.5=0.5。 IQR=Q75−Q25=0.5−-0.4167=0.9167；均值 μ=Σx/n=5.6389/125=0.0451；总体标准差 σ=√(Σ(x−μ)²/n)=√(73.2649/125)=0.7656（ddof=0）；scale=max(IQR,σ,ε)=0.9167。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_oct_composite_sum_0_r2 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 np.tanh ≈ 2 [数学定义]：tanh(z)=(exp(2z)−1)/(exp(2z)+1)，2 来自双曲正切恒等式，输出在 (−1,1)。 解释函数隐含常数。
+    参数 np.log1p ≈ 1 [数学定义]：log1p(x)=ln(1+x)：固定加 1 使 x=0 时输出 0，ln 的底数为自然常数 e。 解释函数隐含常数。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：oct_composite_sum_0_r2 使用有符号 log1p，right-distance 使用 tanh，left-distance 使用稳定倒数，再相乘。
+      u1 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u2 = u1 / scale_oct_composite_sum_0_r2
+      u3 = np.sign(u2)
+      u4 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u5 = u4 / scale_oct_composite_sum_0_r2
+      u6 = np.abs(u5)
+      u7 = np.log1p(u6)
+      u8 = u3 * u7
+      u9 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u10 = u9 / scale_col_72696768742d64697374616e6365
+      u11 = np.tanh(u10)
+      u12 = u8 * u11
+      u13 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u14 = u13 / scale_col_6c6566742d64697374616e6365
+      u15 = np.abs(u14)
+      u16 = 1 + u15
+      u17 = u12 / u16
+      新列 = u17；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.904', 'balanced_accuracy': '0.7696', 'f1': '0.897', 'f1_macro': '0.8063', 'auc': '0.9201', 'log_loss': '0.3397'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0311，其余可用指标均未退化。；XGBoost 使用：{'oct_signed_log_4_r3': {'split_count': 113, 'used_by_xgboost': True, 'gain': '1.1035', 'total_gain': '124.6933', 'total_gain_fraction': '0.0958'}}
+  第 3 轮候选 4 [nonlinear/local_template] oct_log_balance_19_r3
+    依据列：left-distance, right-weight, left-weight
+    训练集依据：left-distance: MI=0.0796, 中位数=3, 偏度=-0.0415；right-weight: MI=0.0422, 中位数=3, 偏度=-0.0836；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.501，分母=5.6497，score=0.0887，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：left-distance / right-weight=-0.0569；left-distance / left-weight=-0.0422；right-weight / left-weight=0.0817
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：前两列偏离基准的对数差异，可能随第三列所处区间改变。
+    提取方式：前两列取绝对标准化偏离并 log1p 压缩，再用第三列的 tanh 调节第二项后求差。
+    可读公式：np.log1p(np.abs((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365)) - np.log1p(np.abs((df['right-weight'] - median_col_72696768742d776569676874) / scale_col_72696768742d776569676874)) * np.tanh((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874)
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_72696768742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=389/125=3.112；总体标准差 σ=√(Σ(x−μ)²/n)=√(256.432/125)=1.4323（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 np.log1p ≈ 1 [数学定义]：log1p(x)=ln(1+x)：固定加 1 使 x=0 时输出 0，ln 的底数为自然常数 e。 解释函数隐含常数。
+    参数 np.tanh ≈ 2 [数学定义]：tanh(z)=(exp(2z)−1)/(exp(2z)+1)，2 来自双曲正切恒等式，输出在 (−1,1)。 解释函数隐含常数。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：前两列取绝对标准化偏离并 log1p 压缩，再用第三列的 tanh 调节第二项后求差。
+      u1 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u2 = u1 / scale_col_6c6566742d64697374616e6365
+      u3 = np.abs(u2)
+      u4 = np.log1p(u3)
+      u5 = df['right-weight'] - median_col_72696768742d776569676874
+      u6 = u5 / scale_col_72696768742d776569676874
+      u7 = np.abs(u6)
+      u8 = np.log1p(u7)
+      u9 = df['left-weight'] - median_col_6c6566742d776569676874
+      u10 = u9 / scale_col_6c6566742d776569676874
+      u11 = np.tanh(u10)
+      u12 = u8 * u11
+      u13 = u4 - u12
+      新列 = u13；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.9', 'balanced_accuracy': '0.7374', 'f1': '0.8901', 'f1_macro': '0.7615', 'auc': '0.9036', 'log_loss': '0.377'}
+    候选检查：拒绝：balanced_accuracy 退化（0.7491 → 0.7374；改善量 -0.0118）。；XGBoost 使用：{'oct_log_balance_19_r3': {'split_count': 134, 'used_by_xgboost': True, 'gain': '0.2057', 'total_gain': '27.5678', 'total_gain_fraction': '0.0214'}}
+  第 3 轮候选 5 [nonlinear/local_template] oct_simple_product_11_r3
+    依据列：right-distance, left-weight
+    训练集依据：right-distance: MI=0.1445, 中位数=3, 偏度=-0.108；left-weight: MI=0, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.4345，分母=5.6497，score=0.0769，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：right-distance / left-weight=0.0468
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：(df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365 * ((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874)
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u2 = u1 / scale_col_72696768742d64697374616e6365
+      u3 = df['left-weight'] - median_col_6c6566742d776569676874
+      u4 = u3 / scale_col_6c6566742d776569676874
+      u5 = u2 * u4
+      新列 = u5；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.908', 'balanced_accuracy': '0.7432', 'f1': '0.8972', 'f1_macro': '0.7711', 'auc': '0.9185', 'log_loss': '0.3467'}
+    候选检查：拒绝：balanced_accuracy 退化（0.7491 → 0.7432；改善量 -0.006）。；XGBoost 使用：{'oct_simple_product_11_r3': {'split_count': 103, 'used_by_xgboost': True, 'gain': '0.2914', 'total_gain': '30.0103', 'total_gain_fraction': '0.0235'}}
+  第 3 轮结论：接受 oct_signed_log_4_r3
+
+阶段：特征生成与验证，第 4/5 轮。
+训练 CART 分支（仅作生成依据）：
+|--- oct_composite_sum_0_r2 <= 0.1389
+|   |--- left-distance <= 1.5000
+|   |   |--- oct_composite_sum_0_r2 <= -0.2917
+|   |   |   |--- class: 2
+|   |   |--- oct_composite_sum_0_r2 >  -0.2917
+|   |   |   |--- class: 2
+|   |--- left-distance >  1.5000
+|   |   |--- left-distance <= 3.5000
+|   |   |   |--- oct_composite_sum_0_r2 <= -0.2778
+|   |   |   |   |--- class: 1
+|   |   |   |--- oct_composite_sum_0_r2 >  -0.2778
+|   |   |   |   |--- class: 0
+|   |   |--- left-distance >  3.5000
+|   |   |   |--- class: 1
+|--- oct_composite_sum_0_r2 >  0.1389
+|   |--- left-distance <= 3.5000
+|   |   |--- class: 2
+|   |--- left-distance >  3.5000
+|   |   |--- oct_composite_sum_0_r2 <= 0.5000
+|   |   |   |--- class: 0
+|   |   |--- oct_composite_sum_0_r2 >  0.5000
+|   |   |   |--- class: 2
+
+当前 XGBoost 训练类别诊断：[{'class': 0, 'rows': 10, 'recall': '0.9'}, {'class': 1, 'rows': 57, 'recall': '1'}, {'class': 2, 'rows': 58, 'recall': '1'}]
+  第 4 轮候选 1 [piecewise/cart_rule] oct_cart_leaf_3_r4
+    依据列：oct_composite_sum_0_r2, left-distance
+    训练集依据：oct_composite_sum_0_r2: MI=0.3982, 中位数=0, 偏度=0.2436；left-distance: MI=0.0755, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.2086，分母=4.6824，score=0.0446，分组数=2；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / left-distance=-0.0721
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 3 轮 oct_cart_leaf_8_r3：拒绝：accuracy 退化（0.896 → 0.888；改善量 -0.008）。；第 3 轮 oct_composite_sum_4_r3：拒绝：accuracy 退化（0.896 → 0.884；改善量 -0.012）。；第 3 轮 oct_signed_log_4_r3：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0311，其余可用指标均未退化。
+    关系假说：训练决策树中多个条件共同出现的子群，可能需要一个联合指示列才能被浅层 XGBoost 表达。
+    提取方式：将 CART 根节点到叶 3 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 6，阈值逐项保留训练来源。
+    可读公式：np.where((df['oct_composite_sum_0_r2'] <= cart_r4_node0) & (df['left-distance'] <= cart_r4_node1) & (df['oct_composite_sum_0_r2'] <= cart_r4_node2), 1, 0)
+    参数 cart_r4_node2 ≈ -0.2917 [train]：CART 深度上限 4、最小叶样本 5，在本节点 11 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 -0.3333 和 -0.25。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r4_node0 ≈ 0.1389 [train]：CART 深度上限 4、最小叶样本 5，在本节点 125 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 0.1111 和 0.1667。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r4_node1 ≈ 1.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 70 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 1 和 2。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 0 ≈ 0 [预先规定的数学或数值规则]：零基准：作为分段判断/空历史输出或非负裁剪下界；由表达式所在分支决定，不从数据拟合。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：将 CART 根节点到叶 3 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 6，阈值逐项保留训练来源。
+      u1 = df['oct_composite_sum_0_r2'] <= cart_r4_node0
+      u2 = df['left-distance'] <= cart_r4_node1
+      u3 = u1 & u2
+      u4 = df['oct_composite_sum_0_r2'] <= cart_r4_node2
+      u5 = u3 & u4
+      u6 = np.where(u5, 1, 0)
+      新列 = u6；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.9', 'balanced_accuracy': '0.7667', 'f1': '0.8931', 'f1_macro': '0.8035', 'auc': '0.9287', 'log_loss': '0.3329'}
+    候选检查：拒绝：accuracy 退化（0.904 → 0.9；改善量 -0.004）。；XGBoost 使用：{'oct_cart_leaf_3_r4': {'split_count': 20, 'used_by_xgboost': True, 'gain': '0.3617', 'total_gain': '7.234', 'total_gain_fraction': '0.0056'}}
+  第 4 轮候选 2 [multicolumn/local_template] oct_composite_10_r4
+    依据列：oct_composite_sum_0_r2, left-distance, oct_signed_log_4_r3
+    训练集依据：oct_composite_sum_0_r2: MI=0.3982, 中位数=0, 偏度=0.2436；left-distance: MI=0.0755, 中位数=3, 偏度=-0.0415；oct_signed_log_4_r3: MI=0.032, 中位数=0.0445, 偏度=1.2756
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.4208，分母=4.6824，score=0.0899，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / left-distance=-0.0721；oct_composite_sum_0_r2 / oct_signed_log_4_r3=0.1554；left-distance / oct_signed_log_4_r3=-0.0007
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 3 轮 oct_cart_leaf_8_r3：拒绝：accuracy 退化（0.896 → 0.888；改善量 -0.008）。；第 3 轮 oct_composite_sum_4_r3：拒绝：accuracy 退化（0.896 → 0.884；改善量 -0.012）。；第 3 轮 oct_signed_log_4_r3：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0311，其余可用指标均未退化。
+    关系假说：oct_composite_sum_0_r2 与 left-distance 的联合状态可能受到 oct_signed_log_4_r3 的调制，第三列以饱和倒数改变交互强度。
+    提取方式：只用训练集中心和尺度无量纲化，再计算 z(oct_composite_sum_0_r2)×z(left-distance)/(1+|z(oct_signed_log_4_r3)|)。
+    可读公式：(df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2 * ((df['left-distance'] - median_col_6c6566742d64697374616e6365) / scale_col_6c6566742d64697374616e6365) / (1 + np.abs((df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3) / scale_oct_signed_log_4_r3))
+    参数 scale_oct_composite_sum_0_r2 ≈ 0.9167 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.4167、x[31]=-0.4167；线性插值 Q=(1−0)×-0.4167+0×-0.4167=-0.4167。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.5、x[93]=0.5；线性插值 Q=(1−0)×0.5+0×0.5=0.5。 IQR=Q75−Q25=0.5−-0.4167=0.9167；均值 μ=Σx/n=5.6389/125=0.0451；总体标准差 σ=√(Σ(x−μ)²/n)=√(73.2649/125)=0.7656（ddof=0）；scale=max(IQR,σ,ε)=0.9167。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d64697374616e6365 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(235.488/125)=1.3726（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_0_r2 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_6c6566742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_oct_signed_log_4_r3 ≈ 0.1921 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.014、x[31]=-0.014；线性插值 Q=(1−0)×-0.014+0×-0.014=-0.014。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.1435、x[93]=0.1435；线性插值 Q=(1−0)×0.1435+0×0.1435=0.1435。 IQR=Q75−Q25=0.1435−-0.014=0.1575；均值 μ=Σx/n=10.0736/125=0.0806；总体标准差 σ=√(Σ(x−μ)²/n)=√(4.612/125)=0.1921（ddof=0）；scale=max(IQR,σ,ε)=0.1921。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_signed_log_4_r3 ≈ 0.0445 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0445、x[62]=0.0445；线性插值 Q=(1−0)×0.0445+0×0.0445=0.0445。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：只用训练集中心和尺度无量纲化，再计算 z(oct_composite_sum_0_r2)×z(left-distance)/(1+|z(oct_signed_log_4_r3)|)。
+      u1 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u2 = u1 / scale_oct_composite_sum_0_r2
+      u3 = df['left-distance'] - median_col_6c6566742d64697374616e6365
+      u4 = u3 / scale_col_6c6566742d64697374616e6365
+      u5 = u2 * u4
+      u6 = df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3
+      u7 = u6 / scale_oct_signed_log_4_r3
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.896', 'balanced_accuracy': '0.7785', 'f1': '0.8922', 'f1_macro': '0.7957', 'auc': '0.9296', 'log_loss': '0.3422'}
+    候选检查：拒绝：accuracy 退化（0.904 → 0.896；改善量 -0.008）。；XGBoost 使用：{'oct_composite_10_r4': {'split_count': 115, 'used_by_xgboost': True, 'gain': '1.0345', 'total_gain': '118.9694', 'total_gain_fraction': '0.0892'}}
+  第 4 轮候选 3 [nonlinear/local_template] oct_simple_difference_3_r4
+    依据列：oct_composite_sum_0_r2, right-weight
+    训练集依据：oct_composite_sum_0_r2: MI=0.3982, 中位数=0, 偏度=0.2436；right-weight: MI=0.0586, 中位数=3, 偏度=-0.0836
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.3762，分母=4.6824，score=0.0803，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / right-weight=0.6514
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：df['oct_composite_sum_0_r2'] - df['right-weight']
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['oct_composite_sum_0_r2'] - df['right-weight']
+      新列 = u1；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.912', 'balanced_accuracy': '0.7754', 'f1': '0.9047', 'f1_macro': '0.8119', 'auc': '0.9244', 'log_loss': '0.3358'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0056，其余可用指标均未退化。；XGBoost 使用：{'oct_simple_difference_3_r4': {'split_count': 127, 'used_by_xgboost': True, 'gain': '0.3478', 'total_gain': '44.1692', 'total_gain_fraction': '0.0337'}}
+  第 4 轮候选 4 [multicolumn/local_template] oct_composite_sum_13_r4
+    依据列：oct_composite_sum_0_r2, right-weight, left-weight
+    训练集依据：oct_composite_sum_0_r2: MI=0.3982, 中位数=0, 偏度=0.2436；right-weight: MI=0.0586, 中位数=3, 偏度=-0.0836；left-weight: MI=0.0193, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.3968，分母=4.6824，score=0.0847，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / right-weight=0.6514；oct_composite_sum_0_r2 / left-weight=-0.5351；right-weight / left-weight=0.0817
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：前两列的联合水平可能比乘性交互稳定，第三列调节其幅度。
+    提取方式：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+    可读公式：((df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2 + (df['right-weight'] - median_col_72696768742d776569676874) / scale_col_72696768742d776569676874) / (1 + np.abs((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874))
+    参数 scale_oct_composite_sum_0_r2 ≈ 0.9167 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.4167、x[31]=-0.4167；线性插值 Q=(1−0)×-0.4167+0×-0.4167=-0.4167。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.5、x[93]=0.5；线性插值 Q=(1−0)×0.5+0×0.5=0.5。 IQR=Q75−Q25=0.5−-0.4167=0.9167；均值 μ=Σx/n=5.6389/125=0.0451；总体标准差 σ=√(Σ(x−μ)²/n)=√(73.2649/125)=0.7656（ddof=0）；scale=max(IQR,σ,ε)=0.9167。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_72696768742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=389/125=3.112；总体标准差 σ=√(Σ(x−μ)²/n)=√(256.432/125)=1.4323（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_0_r2 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+      u1 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u2 = u1 / scale_oct_composite_sum_0_r2
+      u3 = df['right-weight'] - median_col_72696768742d776569676874
+      u4 = u3 / scale_col_72696768742d776569676874
+      u5 = u2 + u4
+      u6 = df['left-weight'] - median_col_6c6566742d776569676874
+      u7 = u6 / scale_col_6c6566742d776569676874
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.916', 'balanced_accuracy': '0.7782', 'f1': '0.9087', 'f1_macro': '0.8148', 'auc': '0.9267', 'log_loss': '0.3366'}
+    候选检查：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0084，其余可用指标均未退化。；XGBoost 使用：{'oct_composite_sum_13_r4': {'split_count': 95, 'used_by_xgboost': True, 'gain': '0.7738', 'total_gain': '73.5105', 'total_gain_fraction': '0.0563'}}
+  第 4 轮候选 5 [multicolumn/local_template] oct_composite_sum_12_r4
+    依据列：oct_composite_sum_0_r2, right-weight, oct_signed_log_4_r3
+    训练集依据：oct_composite_sum_0_r2: MI=0.3982, 中位数=0, 偏度=0.2436；right-weight: MI=0.0586, 中位数=3, 偏度=-0.0836；oct_signed_log_4_r3: MI=0.032, 中位数=0.0445, 偏度=1.2756
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.37，分母=4.6824，score=0.079，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / right-weight=0.6514；oct_composite_sum_0_r2 / oct_signed_log_4_r3=0.1554；right-weight / oct_signed_log_4_r3=0.0962
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：前两列的联合水平可能比乘性交互稳定，第三列调节其幅度。
+    提取方式：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+    可读公式：((df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2) / scale_oct_composite_sum_0_r2 + (df['right-weight'] - median_col_72696768742d776569676874) / scale_col_72696768742d776569676874) / (1 + np.abs((df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3) / scale_oct_signed_log_4_r3))
+    参数 scale_oct_composite_sum_0_r2 ≈ 0.9167 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.4167、x[31]=-0.4167；线性插值 Q=(1−0)×-0.4167+0×-0.4167=-0.4167。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.5、x[93]=0.5；线性插值 Q=(1−0)×0.5+0×0.5=0.5。 IQR=Q75−Q25=0.5−-0.4167=0.9167；均值 μ=Σx/n=5.6389/125=0.0451；总体标准差 σ=√(Σ(x−μ)²/n)=√(73.2649/125)=0.7656（ddof=0）；scale=max(IQR,σ,ε)=0.9167。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_72696768742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=389/125=3.112；总体标准差 σ=√(Σ(x−μ)²/n)=√(256.432/125)=1.4323（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_0_r2 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_oct_signed_log_4_r3 ≈ 0.1921 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.014、x[31]=-0.014；线性插值 Q=(1−0)×-0.014+0×-0.014=-0.014。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.1435、x[93]=0.1435；线性插值 Q=(1−0)×0.1435+0×0.1435=0.1435。 IQR=Q75−Q25=0.1435−-0.014=0.1575；均值 μ=Σx/n=10.0736/125=0.0806；总体标准差 σ=√(Σ(x−μ)²/n)=√(4.612/125)=0.1921（ddof=0）；scale=max(IQR,σ,ε)=0.1921。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_signed_log_4_r3 ≈ 0.0445 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0445、x[62]=0.0445；线性插值 Q=(1−0)×0.0445+0×0.0445=0.0445。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：标准化后前两列相加，按第三列的绝对偏离程度作有界衰减；比较加性与乘性交互。
+      u1 = df['oct_composite_sum_0_r2'] - median_oct_composite_sum_0_r2
+      u2 = u1 / scale_oct_composite_sum_0_r2
+      u3 = df['right-weight'] - median_col_72696768742d776569676874
+      u4 = u3 / scale_col_72696768742d776569676874
+      u5 = u2 + u4
+      u6 = df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3
+      u7 = u6 / scale_oct_signed_log_4_r3
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.92', 'balanced_accuracy': '0.7811', 'f1': '0.9126', 'f1_macro': '0.8176', 'auc': '0.92', 'log_loss': '0.3421'}
+    候选检查：拒绝：auc 退化（0.9201 → 0.92；改善量 -8.67e-05）。；XGBoost 使用：{'oct_composite_sum_12_r4': {'split_count': 86, 'used_by_xgboost': True, 'gain': '0.3639', 'total_gain': '31.2928', 'total_gain_fraction': '0.0239'}}
+  第 4 轮结论：接受 oct_composite_sum_13_r4
+
+阶段：特征生成与验证，第 5/5 轮。
+训练 CART 分支（仅作生成依据）：
+|--- oct_composite_sum_0_r2 <= 0.1389
+|   |--- left-distance <= 1.5000
+|   |   |--- oct_composite_sum_0_r2 <= -0.2917
+|   |   |   |--- class: 2
+|   |   |--- oct_composite_sum_0_r2 >  -0.2917
+|   |   |   |--- class: 2
+|   |--- left-distance >  1.5000
+|   |   |--- left-distance <= 3.5000
+|   |   |   |--- oct_composite_sum_0_r2 <= -0.2778
+|   |   |   |   |--- class: 1
+|   |   |   |--- oct_composite_sum_0_r2 >  -0.2778
+|   |   |   |   |--- class: 0
+|   |   |--- left-distance >  3.5000
+|   |   |   |--- class: 1
+|--- oct_composite_sum_0_r2 >  0.1389
+|   |--- left-distance <= 3.5000
+|   |   |--- class: 2
+|   |--- left-distance >  3.5000
+|   |   |--- oct_composite_sum_0_r2 <= 0.5000
+|   |   |   |--- class: 0
+|   |   |--- oct_composite_sum_0_r2 >  0.5000
+|   |   |   |--- class: 2
+
+当前 XGBoost 训练类别诊断：[{'class': 0, 'rows': 10, 'recall': '0.9'}, {'class': 1, 'rows': 57, 'recall': '1'}, {'class': 2, 'rows': 58, 'recall': '1'}]
+  第 5 轮候选 1 [piecewise/cart_rule] oct_cart_leaf_9_r5
+    依据列：oct_composite_sum_0_r2, left-distance
+    训练集依据：oct_composite_sum_0_r2: MI=0.4103, 中位数=0, 偏度=0.2436；left-distance: MI=0.067, 中位数=3, 偏度=-0.0415
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.1571，分母=4.3167，score=0.0364，分组数=2；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_0_r2 / left-distance=-0.0721
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 3 轮 oct_cart_leaf_8_r3：拒绝：accuracy 退化（0.896 → 0.888；改善量 -0.008）。；第 3 轮 oct_composite_sum_4_r3：拒绝：accuracy 退化（0.896 → 0.884；改善量 -0.012）。；第 3 轮 oct_signed_log_4_r3：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0311，其余可用指标均未退化。
+    关系假说：训练决策树中多个条件共同出现的子群，可能需要一个联合指示列才能被浅层 XGBoost 表达。
+    提取方式：将 CART 根节点到叶 9 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 32，阈值逐项保留训练来源。
+    可读公式：np.where((df['oct_composite_sum_0_r2'] <= cart_r5_node0) & (df['left-distance'] > cart_r5_node1) & (df['left-distance'] > cart_r5_node5), 1, 0)
+    参数 cart_r5_node5 ≈ 3.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 59 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 3 和 4。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r5_node0 ≈ 0.1389 [train]：CART 深度上限 4、最小叶样本 5，在本节点 125 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 0.1111 和 0.1667。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 cart_r5_node1 ≈ 1.5 [train]：CART 深度上限 4、最小叶样本 5，在本节点 70 行训练样本上按加权子节点不纯度选择分裂；边界两侧观测为 1 和 2。阈值取 CART 实际保存的中点（训练内部 float32）；完整精度保存在 value。 冻结训练得到的分段条件，不在验证或测试集重估。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 0 ≈ 0 [预先规定的数学或数值规则]：零基准：作为分段判断/空历史输出或非负裁剪下界；由表达式所在分支决定，不从数据拟合。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：将 CART 根节点到叶 9 的条件逐项求交；满足所有条件输出 1，否则 0。训练支持数为 32，阈值逐项保留训练来源。
+      u1 = df['oct_composite_sum_0_r2'] <= cart_r5_node0
+      u2 = df['left-distance'] > cart_r5_node1
+      u3 = u1 & u2
+      u4 = df['left-distance'] > cart_r5_node5
+      u5 = u3 & u4
+      u6 = np.where(u5, 1, 0)
+      新列 = u6；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.904', 'balanced_accuracy': '0.7696', 'f1': '0.8976', 'f1_macro': '0.7961', 'auc': '0.9324', 'log_loss': '0.3318'}
+    候选检查：拒绝：accuracy 退化（0.916 → 0.904；改善量 -0.012）。；XGBoost 使用：{'oct_cart_leaf_9_r5': {'split_count': 61, 'used_by_xgboost': True, 'gain': '2.0962', 'total_gain': '127.8705', 'total_gain_fraction': '0.0969'}}
+  第 5 轮候选 2 [multicolumn/local_template] oct_composite_24_r5
+    依据列：oct_composite_sum_13_r4, oct_simple_difference_5_r1, left-weight
+    训练集依据：oct_composite_sum_13_r4: MI=0.3069, 中位数=0.0909, 偏度=-0.1639；oct_simple_difference_5_r1: MI=0.2366, 中位数=0, 偏度=-0.0186；left-weight: MI=0.0555, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.4071，分母=4.3167，score=0.0943，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_13_r4 / oct_simple_difference_5_r1=0.8553；oct_composite_sum_13_r4 / left-weight=-0.2085；oct_simple_difference_5_r1 / left-weight=-0.6316
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：oct_composite_sum_13_r4 与 oct_simple_difference_5_r1 的联合状态可能受到 left-weight 的调制，第三列以饱和倒数改变交互强度。
+    提取方式：只用训练集中心和尺度无量纲化，再计算 z(oct_composite_sum_13_r4)×z(oct_simple_difference_5_r1)/(1+|z(left-weight)|)。
+    可读公式：(df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4) / scale_oct_composite_sum_13_r4 * ((df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1) / scale_oct_simple_difference_5_r1) / (1 + np.abs((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874))
+    参数 scale_oct_composite_sum_13_r4 ≈ 1.404 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.6566、x[31]=-0.6566；线性插值 Q=(1−0)×-0.6566+0×-0.6566=-0.6566。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.7475、x[93]=0.7475；线性插值 Q=(1−0)×0.7475+0×0.7475=0.7475。 IQR=Q75−Q25=0.7475−-0.6566=1.404；均值 μ=Σx/n=8.1667/125=0.0653；总体标准差 σ=√(Σ(x−μ)²/n)=√(120.9657/125)=0.9837（ddof=0）；scale=max(IQR,σ,ε)=1.404。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_oct_simple_difference_5_r1 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-1、x[31]=-1；线性插值 Q=(1−0)×-1+0×-1=-1。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=1、x[93]=1；线性插值 Q=(1−0)×1+0×1=1。 IQR=Q75−Q25=1−-1=2；均值 μ=Σx/n=6/125=0.048；总体标准差 σ=√(Σ(x−μ)²/n)=√(437.712/125)=1.8713（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_13_r4 ≈ 0.0909 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0909、x[62]=0.0909；线性插值 Q=(1−0)×0.0909+0×0.0909=0.0909。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_oct_simple_difference_5_r1 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：只用训练集中心和尺度无量纲化，再计算 z(oct_composite_sum_13_r4)×z(oct_simple_difference_5_r1)/(1+|z(left-weight)|)。
+      u1 = df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4
+      u2 = u1 / scale_oct_composite_sum_13_r4
+      u3 = df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1
+      u4 = u3 / scale_oct_simple_difference_5_r1
+      u5 = u2 * u4
+      u6 = df['left-weight'] - median_col_6c6566742d776569676874
+      u7 = u6 / scale_col_6c6566742d776569676874
+      u8 = np.abs(u7)
+      u9 = 1 + u8
+      u10 = u5 / u9
+      新列 = u10；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.916', 'balanced_accuracy': '0.7782', 'f1': '0.9087', 'f1_macro': '0.8148', 'auc': '0.9277', 'log_loss': '0.319'}
+    候选检查：拒绝：主指标 f1_macro 改善 2.17e-05，未超过阈值 0.0001。；XGBoost 使用：{'oct_composite_24_r5': {'split_count': 84, 'used_by_xgboost': True, 'gain': '1.2349', 'total_gain': '103.7338', 'total_gain_fraction': '0.0791'}}
+  第 5 轮候选 3 [nonlinear/local_template] oct_signed_log_24_r5
+    依据列：oct_composite_sum_13_r4, oct_simple_difference_5_r1, left-weight
+    训练集依据：oct_composite_sum_13_r4: MI=0.3069, 中位数=0.0909, 偏度=-0.1639；oct_simple_difference_5_r1: MI=0.2366, 中位数=0, 偏度=-0.0186；left-weight: MI=0.0555, 中位数=3, 偏度=-0.0563
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.476，分母=4.3167，score=0.1103，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_13_r4 / oct_simple_difference_5_r1=0.8553；oct_composite_sum_13_r4 / left-weight=-0.2085；oct_simple_difference_5_r1 / left-weight=-0.6316
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_5_r1：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.1051，其余可用指标均未退化。
+    关系假说：重尾、饱和和反比例关系可能共同存在，需验证非线性复合是否改善分类。
+    提取方式：oct_composite_sum_13_r4 使用有符号 log1p，oct_simple_difference_5_r1 使用 tanh，left-weight 使用稳定倒数，再相乘。
+    可读公式：np.sign((df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4) / scale_oct_composite_sum_13_r4) * np.log1p(np.abs((df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4) / scale_oct_composite_sum_13_r4)) * np.tanh((df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1) / scale_oct_simple_difference_5_r1) / (1 + np.abs((df['left-weight'] - median_col_6c6566742d776569676874) / scale_col_6c6566742d776569676874))
+    参数 scale_oct_simple_difference_5_r1 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-1、x[31]=-1；线性插值 Q=(1−0)×-1+0×-1=-1。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=1、x[93]=1；线性插值 Q=(1−0)×1+0×1=1。 IQR=Q75−Q25=1−-1=2；均值 μ=Σx/n=6/125=0.048；总体标准差 σ=√(Σ(x−μ)²/n)=√(437.712/125)=1.8713（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_col_6c6566742d776569676874 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=4、x[93]=4；线性插值 Q=(1−0)×4+0×4=4。 IQR=Q75−Q25=4−2=2；均值 μ=Σx/n=383/125=3.064；总体标准差 σ=√(Σ(x−μ)²/n)=√(219.488/125)=1.3251（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_oct_composite_sum_13_r4 ≈ 1.404 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.6566、x[31]=-0.6566；线性插值 Q=(1−0)×-0.6566+0×-0.6566=-0.6566。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.7475、x[93]=0.7475；线性插值 Q=(1−0)×0.7475+0×0.7475=0.7475。 IQR=Q75−Q25=0.7475−-0.6566=1.404；均值 μ=Σx/n=8.1667/125=0.0653；总体标准差 σ=√(Σ(x−μ)²/n)=√(120.9657/125)=0.9837（ddof=0）；scale=max(IQR,σ,ε)=1.404。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_simple_difference_5_r1 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_6c6566742d776569676874 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_oct_composite_sum_13_r4 ≈ 0.0909 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0909、x[62]=0.0909；线性插值 Q=(1−0)×0.0909+0×0.0909=0.0909。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 1 ≈ 1 [预先规定的数学或数值规则]：固定常数：分段指示列的 1 表示条件成立；用于 1+|z| 时保证分母至少为 1。具体含义由出现位置决定，不是估计系数。 参见显示公式中的具体位置。
+    参数 np.tanh ≈ 2 [数学定义]：tanh(z)=(exp(2z)−1)/(exp(2z)+1)，2 来自双曲正切恒等式，输出在 (−1,1)。 解释函数隐含常数。
+    参数 np.log1p ≈ 1 [数学定义]：log1p(x)=ln(1+x)：固定加 1 使 x=0 时输出 0，ln 的底数为自然常数 e。 解释函数隐含常数。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：oct_composite_sum_13_r4 使用有符号 log1p，oct_simple_difference_5_r1 使用 tanh，left-weight 使用稳定倒数，再相乘。
+      u1 = df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4
+      u2 = u1 / scale_oct_composite_sum_13_r4
+      u3 = np.sign(u2)
+      u4 = df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4
+      u5 = u4 / scale_oct_composite_sum_13_r4
+      u6 = np.abs(u5)
+      u7 = np.log1p(u6)
+      u8 = u3 * u7
+      u9 = df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1
+      u10 = u9 / scale_oct_simple_difference_5_r1
+      u11 = np.tanh(u10)
+      u12 = u8 * u11
+      u13 = df['left-weight'] - median_col_6c6566742d776569676874
+      u14 = u13 / scale_col_6c6566742d776569676874
+      u15 = np.abs(u14)
+      u16 = 1 + u15
+      u17 = u12 / u16
+      新列 = u17；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.916', 'balanced_accuracy': '0.7782', 'f1': '0.9087', 'f1_macro': '0.8148', 'auc': '0.928', 'log_loss': '0.3187'}
+    候选检查：拒绝：主指标 f1_macro 改善 2.17e-05，未超过阈值 0.0001。；XGBoost 使用：{'oct_signed_log_24_r5': {'split_count': 87, 'used_by_xgboost': True, 'gain': '1.2029', 'total_gain': '104.648', 'total_gain_fraction': '0.0798'}}
+  第 5 轮候选 4 [nonlinear/local_template] oct_log_balance_27_r5
+    依据列：oct_composite_sum_13_r4, right-distance, oct_signed_log_4_r3
+    训练集依据：oct_composite_sum_13_r4: MI=0.3069, 中位数=0.0909, 偏度=-0.1639；right-distance: MI=0.1742, 中位数=3, 偏度=-0.108；oct_signed_log_4_r3: MI=0.06, 中位数=0.0445, 偏度=1.2756
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.398，分母=4.3167，score=0.0922，分组数=8；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_13_r4 / right-distance=0.2846；oct_composite_sum_13_r4 / oct_signed_log_4_r3=0.1369；right-distance / oct_signed_log_4_r3=0.0492
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 1 轮 oct_cart_leaf_17_r1：本轮另一个可接受候选的主指标更优，故未保留。；第 1 轮 oct_composite_sum_2_r1：拒绝：accuracy 退化（0.884 → 0.872；改善量 -0.012）。；第 1 轮 oct_simple_difference_0_r1：拒绝：accuracy 退化（0.884 → 0.852；改善量 -0.032）。
+    关系假说：前两列偏离基准的对数差异，可能随第三列所处区间改变。
+    提取方式：前两列取绝对标准化偏离并 log1p 压缩，再用第三列的 tanh 调节第二项后求差。
+    可读公式：np.log1p(np.abs((df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4) / scale_oct_composite_sum_13_r4)) - np.log1p(np.abs((df['right-distance'] - median_col_72696768742d64697374616e6365) / scale_col_72696768742d64697374616e6365)) * np.tanh((df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3) / scale_oct_signed_log_4_r3)
+    参数 scale_oct_composite_sum_13_r4 ≈ 1.404 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.6566、x[31]=-0.6566；线性插值 Q=(1−0)×-0.6566+0×-0.6566=-0.6566。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.7475、x[93]=0.7475；线性插值 Q=(1−0)×0.7475+0×0.7475=0.7475。 IQR=Q75−Q25=0.7475−-0.6566=1.404；均值 μ=Σx/n=8.1667/125=0.0653；总体标准差 σ=√(Σ(x−μ)²/n)=√(120.9657/125)=0.9837（ddof=0）；scale=max(IQR,σ,ε)=1.404。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_oct_signed_log_4_r3 ≈ 0.1921 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.014、x[31]=-0.014；线性插值 Q=(1−0)×-0.014+0×-0.014=-0.014。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.1435、x[93]=0.1435；线性插值 Q=(1−0)×0.1435+0×0.1435=0.1435。 IQR=Q75−Q25=0.1435−-0.014=0.1575；均值 μ=Σx/n=10.0736/125=0.0806；总体标准差 σ=√(Σ(x−μ)²/n)=√(4.612/125)=0.1921（ddof=0）；scale=max(IQR,σ,ε)=0.1921。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_13_r4 ≈ 0.0909 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0909、x[62]=0.0909；线性插值 Q=(1−0)×0.0909+0×0.0909=0.0909。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 scale_col_72696768742d64697374616e6365 ≈ 3 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=2、x[31]=2；线性插值 Q=(1−0)×2+0×2=2。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=5、x[93]=5；线性插值 Q=(1−0)×5+0×5=5。 IQR=Q75−Q25=5−2=3；均值 μ=Σx/n=394/125=3.152；总体标准差 σ=√(Σ(x−μ)²/n)=√(260.112/125)=1.4425（ddof=0）；scale=max(IQR,σ,ε)=3。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_signed_log_4_r3 ≈ 0.0445 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0445、x[62]=0.0445；线性插值 Q=(1−0)×0.0445+0×0.0445=0.0445。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_col_72696768742d64697374616e6365 ≈ 3 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=3、x[62]=3；线性插值 Q=(1−0)×3+0×3=3。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 np.log1p ≈ 1 [数学定义]：log1p(x)=ln(1+x)：固定加 1 使 x=0 时输出 0，ln 的底数为自然常数 e。 解释函数隐含常数。
+    参数 np.tanh ≈ 2 [数学定义]：tanh(z)=(exp(2z)−1)/(exp(2z)+1)，2 来自双曲正切恒等式，输出在 (−1,1)。 解释函数隐含常数。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：前两列取绝对标准化偏离并 log1p 压缩，再用第三列的 tanh 调节第二项后求差。
+      u1 = df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4
+      u2 = u1 / scale_oct_composite_sum_13_r4
+      u3 = np.abs(u2)
+      u4 = np.log1p(u3)
+      u5 = df['right-distance'] - median_col_72696768742d64697374616e6365
+      u6 = u5 / scale_col_72696768742d64697374616e6365
+      u7 = np.abs(u6)
+      u8 = np.log1p(u7)
+      u9 = df['oct_signed_log_4_r3'] - median_oct_signed_log_4_r3
+      u10 = u9 / scale_oct_signed_log_4_r3
+      u11 = np.tanh(u10)
+      u12 = u8 * u11
+      u13 = u4 - u12
+      新列 = u13；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.912', 'balanced_accuracy': '0.7753', 'f1': '0.9052', 'f1_macro': '0.8067', 'auc': '0.9308', 'log_loss': '0.3319'}
+    候选检查：拒绝：accuracy 退化（0.916 → 0.912；改善量 -0.004）。；XGBoost 使用：{'oct_log_balance_27_r5': {'split_count': 71, 'used_by_xgboost': True, 'gain': '0.4633', 'total_gain': '32.8934', 'total_gain_fraction': '0.0251'}}
+  第 5 轮候选 5 [nonlinear/local_template] oct_simple_product_7_r5
+    依据列：oct_composite_sum_13_r4, oct_simple_difference_5_r1
+    训练集依据：oct_composite_sum_13_r4: MI=0.3069, 中位数=0.0909, 偏度=-0.1639；oct_simple_difference_5_r1: MI=0.2366, 中位数=0, 偏度=-0.0186
+    模型误差预筛：score = Σ_b n_b ||mean(r_b) − mean(r)||² / Σ_i ||r_i − mean(r)||²; r=onehot(y)−p_XGBoost；分子=0.3944，分母=4.3167，score=0.0914，分组数=7；仅训练内启发式，仍须通过验证。
+    列间 Spearman：oct_composite_sum_13_r4 / oct_simple_difference_5_r1=0.8553
+    历史反馈调整：根据历史接受/拒绝类型调整候选优先级，并保留不同家族的探索。
+    参考历史：第 2 轮 oct_cart_leaf_9_r2：拒绝：accuracy 退化（0.892 → 0.872；改善量 -0.02）。；第 2 轮 oct_composite_sum_0_r2：符合接受条件，待本轮候选比较：主指标 f1_macro 改善 0.0263，其余可用指标均未退化。；第 2 轮 oct_piecewise_0_median_r2：本轮另一个可接受候选的主指标更优，故未保留。
+    关系假说：检验简单交互能否解释当前模型尚未捕获的关系；与复杂候选一起预筛。
+    提取方式：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+    可读公式：(df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4) / scale_oct_composite_sum_13_r4 * ((df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1) / scale_oct_simple_difference_5_r1)
+    参数 scale_oct_composite_sum_13_r4 ≈ 1.404 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-0.6566、x[31]=-0.6566；线性插值 Q=(1−0)×-0.6566+0×-0.6566=-0.6566。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=0.7475、x[93]=0.7475；线性插值 Q=(1−0)×0.7475+0×0.7475=0.7475。 IQR=Q75−Q25=0.7475−-0.6566=1.404；均值 μ=Σx/n=8.1667/125=0.0653；总体标准差 σ=√(Σ(x−μ)²/n)=√(120.9657/125)=0.9837（ddof=0）；scale=max(IQR,σ,ε)=1.404。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 scale_oct_simple_difference_5_r1 ≈ 2 [train]：Q25: 训练列升序排列，p=0.25；零基位置 h=(n−1)p=(125−1)×0.25=31；相邻值 x[31]=-1、x[31]=-1；线性插值 Q=(1−0)×-1+0×-1=-1。 Q75: 训练列升序排列，p=0.75；零基位置 h=(n−1)p=(125−1)×0.75=93；相邻值 x[93]=1、x[93]=1；线性插值 Q=(1−0)×1+0×1=1。 IQR=Q75−Q25=1−-1=2；均值 μ=Σx/n=6/125=0.048；总体标准差 σ=√(Σ(x−μ)²/n)=√(437.712/125)=1.8713（ddof=0）；scale=max(IQR,σ,ε)=2。选择两种离散程度中较大的值以避免放大微小波动；ε=1e-6 是固定数值下限，并非拟合结果。 无量纲化或设定衰减尺度，使用训练集冻结值；不在验证/测试重新估计。
+    参数 median_oct_composite_sum_13_r4 ≈ 0.0909 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0.0909、x[62]=0.0909；线性插值 Q=(1−0)×0.0909+0×0.0909=0.0909。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    参数 median_oct_simple_difference_5_r1 ≈ 0 [train]：训练列升序排列，p=0.5；零基位置 h=(n−1)p=(125−1)×0.5=62；相邻值 x[62]=0、x[62]=0；线性插值 Q=(1−0)×0+0×0=0。 用中位数作为居中基准或均分门槛，减少极端值影响。
+    公式构造步骤：
+      选列依据：训练集互信息反映单列与目标的统计关联；几何/业务定义给出组合假说，不能据此保证提升。
+      构造依据：按显示公式计算两列的乘积、比例或差；比值分母加固定 ε 防止除零。
+      u1 = df['oct_composite_sum_13_r4'] - median_oct_composite_sum_13_r4
+      u2 = u1 / scale_oct_composite_sum_13_r4
+      u3 = df['oct_simple_difference_5_r1'] - median_oct_simple_difference_5_r1
+      u4 = u3 / scale_oct_simple_difference_5_r1
+      u5 = u2 * u4
+      新列 = u5；所有输入逐行计算，统计参数仅在训练集计算一次。
+      检验假说：保持 XGBoost 配置不变，用验证集主指标增益及其他指标不退化共同决定是否接受。
+    候选评估指标：{'accuracy': '0.916', 'balanced_accuracy': '0.7782', 'f1': '0.9087', 'f1_macro': '0.8148', 'auc': '0.9264', 'log_loss': '0.3249'}
+    候选检查：拒绝：auc 退化（0.9267 → 0.9264；改善量 -0.0003）。；XGBoost 使用：{'oct_simple_product_7_r5': {'split_count': 77, 'used_by_xgboost': True, 'gain': '1.3216', 'total_gain': '101.7633', 'total_gain_fraction': '0.0779'}}
+  第 5 轮结论：未接受新特征
+
+阶段：特征与模型已冻结，开始独立测试集评估。
+独立测试基线指标：{'accuracy': '0.828', 'balanced_accuracy': '0.6', 'f1': '0.8037', 'f1_macro': '0.5824', 'auc': '0.8412', 'log_loss': '0.5076'}
+独立测试优化指标：{'accuracy': '0.916', 'balanced_accuracy': '0.7739', 'f1': '0.9078', 'f1_macro': '0.8047', 'auc': '0.9105', 'log_loss': '0.3471'}
+阶段：执行特征重要性与消融检查。
+  消融 oct_simple_difference_5_r1: 置换 Δf1_macro=0.4283 ± 0.0124；删除重训 Δf1_macro=0.2224；贡献证据=支持
+  消融 oct_composite_sum_0_r2: 置换 Δf1_macro=0.4132 ± 0.0100；删除重训 Δf1_macro=0.1635；贡献证据=支持
+  消融 oct_signed_log_4_r3: 置换 Δf1_macro=0.1065 ± 0.0300；删除重训 Δf1_macro=0.0965；贡献证据=支持
+  消融 oct_composite_sum_13_r4: 置换 Δf1_macro=0.0230 ± 0.0241；删除重训 Δf1_macro=-0.0143；贡献证据=不足
+  消融 __all_generated__: 置换 Δf1_macro=0.4283 ± 0.0124；删除重训 Δf1_macro=0.2224；贡献证据=支持
+结果已保存到：/home/asus/OPD/-OPD/tabular_data/outputs/balance_scale/holdout_20_40_40/reference/clean/features_reasoned/rounds_5_candidates_5/seed_42
+{
+  "dataset": "balance_scale",
+  "model": {
+    "backend": "xgboost",
+    "device": "cuda:0",
+    "profile": "reference",
+    "parameters": {
+      "n_estimators": 60,
+      "max_depth": 3,
+      "learning_rate": "0.08",
+      "subsample": "1",
+      "colsample_bytree": "1",
+      "random_state": 42,
+      "tree_method": "hist"
+    },
+    "xgboost_version": "3.4.1",
+    "cuda_version": "12.9"
+  },
+  "validation": {
+    "baseline": {
+      "accuracy": "0.884",
+      "balanced_accuracy": "0.6524",
+      "f1": "0.8574",
+      "f1_macro": "0.6439",
+      "auc": "0.8961",
+      "log_loss": "0.4336"
+    },
+    "optimized": {
+      "accuracy": "0.916",
+      "balanced_accuracy": "0.7782",
+      "f1": "0.9087",
+      "f1_macro": "0.8148",
+      "auc": "0.9267",
+      "log_loss": "0.3366"
+    },
+    "improvement": {
+      "accuracy": "0.032",
+      "balanced_accuracy": "0.1258",
+      "f1": "0.0513",
+      "f1_macro": "0.1709",
+      "auc": "0.0306",
+      "log_loss": "0.097"
+    }
+  },
+  "test": {
+    "baseline": {
+      "accuracy": "0.828",
+      "balanced_accuracy": "0.6",
+      "f1": "0.8037",
+      "f1_macro": "0.5824",
+      "auc": "0.8412",
+      "log_loss": "0.5076"
+    },
+    "optimized": {
+      "accuracy": "0.916",
+      "balanced_accuracy": "0.7739",
+      "f1": "0.9078",
+      "f1_macro": "0.8047",
+      "auc": "0.9105",
+      "log_loss": "0.3471"
+    },
+    "improvement": {
+      "accuracy": "0.088",
+      "balanced_accuracy": "0.1739",
+      "f1": "0.1042",
+      "f1_macro": "0.2224",
+      "auc": "0.0694",
+      "log_loss": "0.1606"
+    }
+  },
+  "accepted_features": [
+    "oct_simple_difference_5_r1",
+    "oct_composite_sum_0_r2",
+    "oct_signed_log_4_r3",
+    "oct_composite_sum_13_r4"
+  ],
+  "feature_generation": {
+    "client": "OfflineFeatureClient",
+    "version": "cart_residual_v6",
+    "mode": "reasoned",
+    "rounds": 5,
+    "candidates_per_round": 5,
+    "feedback_learning": "prior_round_validation_only",
+    "evaluated_candidates": 25,
+    "api_calls_succeeded": 0,
+    "local_rule_calls": 5
+  },
+  "ablation_status": "completed"
+}
+
+运行状态：completed；退出码：0；结束时间：2026-10-03T07:06:17.908878+00:00
+日志已保存：/home/asus/OPD/-OPD/tabular_data/outputs/balance_scale/holdout_20_40_40/reference/clean/features_reasoned/rounds_5_candidates_5/seed_42/training.log

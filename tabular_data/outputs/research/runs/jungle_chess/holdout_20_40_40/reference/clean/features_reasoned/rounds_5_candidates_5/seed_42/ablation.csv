@@ -1,0 +1,6 @@
+feature,split_count,used_by_xgboost,gain,total_gain_fraction,primary_metric,importance_score,importance_std,single_column_importance_score,drop_retrain_score_drop,supported_predictive_contribution,dependency_group
+oct_composite_19_r1,156.0,True,38.829925537109375,0.10839500474533877,f1_macro,0.11861624424046631,0.0032342734013635684,0.11531649092682139,0.04048268586479453,True,oct_composite_19_r1 | oct_signed_log_33_r3
+oct_simple_difference_17_r2,138.0,True,59.502716064453125,0.14693796048684646,f1_macro,0.12957140731143624,0.0030896562678955158,0.12957140731143624,0.0360895692938894,True,oct_simple_difference_17_r2
+oct_signed_log_33_r3,45.0,True,39.05363845825195,0.03144793463510862,f1_macro,0.020949822408689832,0.0014189820352072172,0.020949822408689832,0.01912635839058585,True,oct_signed_log_33_r3
+oct_chess_manhattan_r4,141.0,True,19.968427658081055,0.05038266194258173,f1_macro,0.021640426507570976,0.0016499988998060567,0.021640426507570976,0.007464346321426563,True,oct_chess_manhattan_r4
+__all_generated__,,,,,f1_macro,0.22040324745803944,0.0034874766364977657,,0.18249188627459878,True,oct_composite_19_r1 | oct_simple_difference_17_r2 | oct_signed_log_33_r3 | oct_chess_manhattan_r4

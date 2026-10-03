@@ -1059,17 +1059,16 @@
         <div class="integrated-simulator">
             <div class="simulator-header">
                 <h2><i class="fas fa-sitemap"></i> 核心模拟与数据集演示</h2>
-                <p>卡片展示预置示意数据；模拟测试使用内置 Wine 样例，执行实际模型评估</p>
+                <p>卡片显示已完成训练的测试结果快照（reference / reasoned / seed 42）；网页模拟使用 Jungle Chess 训练集样例</p>
             </div>
             <div class="simulator-main">
                 <div class="left-panel">
                     <div class="dataset-selector">
                         <h3>数据集选择</h3>
                         <div class="dataset-cards" id="datasetCards">
-                            <div class="dataset-mini-card" data-dataset="white_wine"><i class="fas fa-wine-glass-alt"></i><h4>白葡萄酒品质</h4><p>化学特征 → 质量评级</p></div>
-                            <div class="dataset-mini-card" data-dataset="bank"><i class="fas fa-university"></i><h4>银行营销</h4><p>客户特征 → 存款认购</p></div>
-                            <div class="dataset-mini-card" data-dataset="phishing"><i class="fas fa-shield-alt"></i><h4>钓鱼网站</h4><p>URL特征 → 恶意检测</p></div>
-                            <div class="dataset-mini-card" data-dataset="biodeg"><i class="fas fa-leaf"></i><h4>生物降解</h4><p>分子描述符 → 降解性</p></div>
+                            <div class="dataset-mini-card" data-dataset="jungle_chess"><i class="fas fa-chess"></i><h4>Jungle Chess</h4><p>棋子位置与强度 → 3 类残局</p></div>
+                            <div class="dataset-mini-card" data-dataset="pendigits"><i class="fas fa-pen"></i><h4>Pendigits</h4><p>笔迹采样点 → 10 类数字</p></div>
+                            <div class="dataset-mini-card" data-dataset="gesture_phase"><i class="fas fa-hand-paper"></i><h4>GesturePhase</h4><p>运动描述符 → 5 类手势阶段</p></div>
                         </div>
                     </div>
                     <div class="workflow-image-container">
@@ -1088,7 +1087,7 @@
                             <div class="metric-label">保留的新特征</div>
                         </div>
                     </div>
-                    <button class="run-button" id="runSimulateBtn">运行表格模拟测试</button>
+                    <button class="run-button" id="runSimulateBtn">运行 Jungle 网页演示</button>
                     <div id="datasetReport" class="dataset-report"></div>
                     <button class="schematic-btn" id="openSchematicBtn"><i class="fas fa-project-diagram"></i> 流程示意图</button>
                 </div>
@@ -1100,8 +1099,8 @@
         <h2 class="section-title">流程示意指标对比</h2>
         <p class="section-subtitle">以下为预置示意数值；本次运行结果请查看模拟测试或上传后的分析报告</p>
         <div class="metric-tabs">
-            <div class="metric-tab active" data-metric="f1"><i class="fas fa-chart-bar"></i> F1-Score</div>
-            <div class="metric-tab" data-metric="mse"><i class="fas fa-chart-line"></i> MSE 损失</div>
+            <div class="metric-tab active" data-metric="f1"><i class="fas fa-chart-bar"></i> Macro F1</div>
+            <div class="metric-tab" data-metric="log_loss"><i class="fas fa-chart-line"></i> Log Loss</div>
         </div>
         <div class="performance-container">
             <div class="performance-card"><div class="performance-header"><i class="fas fa-chart-bar"></i><h3 id="barChartTitle">各数据集 F1-Score 提升对比</h3></div><div class="chart-container"><canvas id="datasetBarChart"></canvas></div></div>
@@ -1141,65 +1140,11 @@
     <footer><div class="footer-logo-container"><img src="图片1.png" alt="OCTree Logo" class="footer-logo-img"></div><p>基于决策树推理的列特征优化生成器 | 高质量表格数据扩充技术研究</p><p>© 2026 大创项目</p></footer>
 </div>
 
+<script src="tabular_data/outputs/benchmark_results.js"></script>
 <script>
-    const metricsData = {
-        white_wine: {
-            name: "白葡萄酒品质",
-            baseline: { f1: 0.748, mse: 0.158 },
-            final: { f1: 0.801, mse: 0.121 },
-            improvement: { f1: 7.1, mse: -23.4 },
-            iter_f1: [0.748, 0.775, 0.789, 0.801],
-            iter_mse: [0.158, 0.141, 0.131, 0.121],
-            rules: [
-                { desc: "酒精与挥发酸比值 (非线性比率)", formula: "df['alcohol'] / (df['volatile_acidity'] + 0.01)", f1_gain: 7.2, mse_reduction: 12.8 },
-                { desc: "游离二氧化硫与总二氧化硫比率 (化学平衡)", formula: "df['free_sulfur_dioxide'] / (df['total_sulfur_dioxide'] + 0.01)", f1_gain: 5.8, mse_reduction: 10.5 },
-                { desc: "硫酸盐与氯化物对数乘积 (风味交互)", formula: "np.log(df['sulphates'] + 1) * np.log(df['chlorides'] + 1)", f1_gain: 4.9, mse_reduction: 9.3 }
-            ],
-            top_features: ["酒精含量", "挥发酸", "硫酸盐", "pH值"]
-        },
-        bank: {
-            name: "银行营销",
-            baseline: { f1: 0.768, mse: 0.186 },
-            final: { f1: 0.819, mse: 0.148 },
-            improvement: { f1: 6.6, mse: -20.4 },
-            iter_f1: [0.768, 0.791, 0.806, 0.819],
-            iter_mse: [0.186, 0.170, 0.158, 0.148],
-            rules: [
-                { desc: "存款余额与通话时长比值 (金融营销逻辑)", formula: "df['balance'] / (df['duration'] + 0.01)", f1_gain: 7.1, mse_reduction: 11.8 },
-                { desc: "年龄与上次联系天数对数乘积 (客户粘性)", formula: "df['age'] * np.log(df['pdays'] + 1)", f1_gain: 6.0, mse_reduction: 10.2 }
-            ],
-            top_features: ["存款余额", "通话时长", "年龄"]
-        },
-        phishing: {
-            name: "钓鱼网站",
-            baseline: { f1: 0.912, mse: 0.081 },
-            final: { f1: 0.945, mse: 0.059 },
-            improvement: { f1: 3.6, mse: -27.2 },
-            iter_f1: [0.912, 0.928, 0.937, 0.945],
-            iter_mse: [0.081, 0.072, 0.065, 0.059],
-            rules: [
-                { desc: "URL长度与@符号存在性交互 (异常模式检测)", formula: "df['URL_Length'] * df['having_At_Symbol']", f1_gain: 3.2, mse_reduction: 14.8 },
-                { desc: "重定向次数与SSL状态比值 (安全行为分析)", formula: "df['Redirect'] / (df['SSLfinal_State'] + 1)", f1_gain: 2.9, mse_reduction: 12.4 }
-            ],
-            top_features: ["URL长度", "SSL状态", "重定向次数"]
-        },
-        biodeg: {
-            name: "生物降解",
-            baseline: { f1: 0.775, mse: 0.168 },
-            final: { f1: 0.838, mse: 0.131 },
-            improvement: { f1: 8.1, mse: -22.0 },
-            iter_f1: [0.775, 0.805, 0.823, 0.838],
-            iter_mse: [0.168, 0.150, 0.140, 0.131],
-            rules: [
-                { desc: "分子描述符V1与V2比值 (生化交互)", formula: "df['V1'] / (df['V2'] + 0.01)", f1_gain: 7.8, mse_reduction: 13.2 },
-                { desc: "V4对数与V5乘积 (高阶非线性组合)", formula: "np.log(df['V4'] + 1) * df['V5']", f1_gain: 7.1, mse_reduction: 11.5 }
-            ],
-            top_features: ["分子描述符V1", "分子描述符V4", "分子量"]
-        }
-    };
-
+    const metricsData = window.TabularBenchmarks || {};
     let currentMetric = "f1";
-    let currentDataset = "white_wine";
+    let currentDataset = "jungle_chess";
     let barChart = null, iterChart = null;
     function openSchematicModal() {
         document.getElementById('schematicModal').classList.add('active');
@@ -1213,81 +1158,69 @@
     function updateBarChart() {
         const ctx = document.getElementById('datasetBarChart');
         if(!ctx || typeof Chart !== 'function') return;
-        const labels = ['白葡萄酒品质', '银行营销', '钓鱼网站', '生物降解'];
-        const dsList = ['white_wine', 'bank', 'phishing', 'biodeg'];
+        const labels = Object.values(metricsData).map(d => d.name);
+        const dsList = Object.keys(metricsData);
         const baselineData = dsList.map(ds => metricsData[ds].baseline[currentMetric]);
         const finalData = dsList.map(ds => metricsData[ds].final[currentMetric]);
-        const metricNames = { f1: 'F1-Score', mse: 'MSE 损失' };
+        const metricNames = { f1: 'Macro F1', log_loss: 'Log Loss' };
         if(barChart) barChart.destroy();
         barChart = new Chart(ctx, {
             type: 'bar',
-            data: { labels, datasets: [{ label: `基线 ${metricNames[currentMetric]}`, data: baselineData, backgroundColor: 'rgba(0,102,204,0.5)' }, { label: `OCTree v2.0 优化`, data: finalData, backgroundColor: 'rgba(122,40,203,0.7)' }] },
+            data: { labels, datasets: [{ label: `基线 ${metricNames[currentMetric]}`, data: baselineData, backgroundColor: 'rgba(0,102,204,0.5)' }, { label: `OCTree reasoned 优化`, data: finalData, backgroundColor: 'rgba(122,40,203,0.7)' }] },
             options: { responsive: true, maintainAspectRatio: true, scales: { y: { title: { display: true, text: metricNames[currentMetric] } } } }
         });
-        document.getElementById('barChartTitle').innerHTML = `<i class="fas fa-chart-bar"></i> 各数据集 ${metricNames[currentMetric]} 提升对比 (v2.0)`;
+        document.getElementById('barChartTitle').innerHTML = `<i class="fas fa-chart-bar"></i> 独立测试 ${metricNames[currentMetric]} 对比（reference / reasoned）`;
     }
 
     function updateLineChart() {
         const ctx = document.getElementById('iterLineChart');
         if(!ctx || typeof Chart !== 'function') return;
+        if (!metricsData[currentDataset]) return;
         const data = metricsData[currentDataset][`iter_${currentMetric}`];
-        const metricNames = { f1: 'F1-Score', mse: 'MSE 损失' };
+        const metricNames = { f1: 'Macro F1', log_loss: 'Log Loss' };
         if(iterChart) iterChart.destroy();
         iterChart = new Chart(ctx, {
             type: 'line',
-            data: { labels: ['初始', '迭代1', '迭代2', '迭代3'], datasets: [{ label: metricNames[currentMetric], data: data, borderColor: '#0066cc', backgroundColor: 'rgba(0,102,204,0.1)', tension: 0.4, fill: true, pointBackgroundColor: '#7a28cb', pointRadius: 5 }] },
+            data: { labels: data.map((_, i) => i ? `第 ${i} 轮` : '基线'), datasets: [{ label: metricNames[currentMetric], data: data, borderColor: '#0066cc', backgroundColor: 'rgba(0,102,204,0.1)', tension: 0.4, fill: true, pointBackgroundColor: '#7a28cb', pointRadius: 5 }] },
             options: { responsive: true, maintainAspectRatio: true, scales: { y: { title: { display: true, text: metricNames[currentMetric] } } } }
         });
-        document.getElementById('iterChartTitle').innerHTML = `<i class="fas fa-chart-line"></i> 迭代优化过程（${metricsData[currentDataset].name}）- ${metricNames[currentMetric]} (v2.0)`;
+        document.getElementById('iterChartTitle').innerHTML = `<i class="fas fa-chart-line"></i> 验证集轮次轨迹（${metricsData[currentDataset].name}）- ${metricNames[currentMetric]} (v2.0)`;
     }
+
+    const escapeSnapshot = value => String(value).replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
 
     function updateSummaryCards() {
         const container = document.getElementById('summaryContainer');
-        const dsList = ['white_wine', 'bank', 'phishing', 'biodeg'];
-        const icons = { white_wine: 'fa-wine-glass-alt', bank: 'fa-university', phishing: 'fa-shield-alt', biodeg: 'fa-leaf' };
-        container.innerHTML = dsList.map(ds => {
-            const d = metricsData[ds];
-            const improve = d.improvement[currentMetric];
-            const sign = currentMetric === 'mse' ? '' : '+';
-            const color = currentMetric === 'mse' && improve < 0 ? '#28a745' : '#0066cc';
-            return `<div class="summary-card" data-dataset="${ds}">
-                <i class="fas ${icons[ds]}"></i>
-                <div class="summary-content"><h4>${d.name}</h4><div class="summary-value" style="color:${color}">${sign}${improve}%</div><p>${d.baseline[currentMetric].toFixed(3)} → ${d.final[currentMetric].toFixed(3)}</p></div>
-            </div>`;
+        container.innerHTML = Object.entries(metricsData).map(([key, d]) => {
+            const change = d.improvement[currentMetric];
+            const unit = currentMetric === 'f1' ? ' 个百分点' : '';
+            return `<div class="summary-card" data-dataset="${key}"><div class="summary-content">
+                <h4>${d.name}</h4><div class="summary-value">${change > 0 ? '+' : ''}${change}${unit}</div>
+                <p>${d.baseline[currentMetric].toFixed(4)} → ${d.final[currentMetric].toFixed(4)}</p>
+            </div></div>`;
         }).join('');
         document.querySelectorAll('.summary-card').forEach(card => {
-            card.onclick = () => {
-                currentDataset = card.getAttribute('data-dataset');
-                updateLineChart();
-                updateSimulatorFromDataset();
-            };
+            card.onclick = () => { currentDataset = card.getAttribute('data-dataset'); updateLineChart(); updateSimulatorFromDataset(); };
         });
     }
 
     function updateSimulatorFromDataset() {
         const d = metricsData[currentDataset];
+        if (!d) {
+            document.getElementById('datasetReport').textContent = '尚无当前配置的已完成训练报告。训练结束后刷新页面查看。';
+            return;
+        }
         document.getElementById('metric-iter').textContent = d.iter_f1.length - 1;
         document.getElementById('metric-rules').textContent = d.rules.length;
         const reportDiv = document.getElementById('datasetReport');
-        const rulesHtml = d.rules.map(r => `
-            <div style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,102,204,0.1);">
-                <div style="font-weight: 600; color: var(--text-dark);">${r.desc}</div>
-                <div style="font-family: monospace; font-size: 0.7rem; color: var(--accent-cyan); background: rgba(0,102,204,0.08); padding: 4px 8px; border-radius: 6px; margin-top: 4px;">${r.formula}</div>
-            </div>
-        `).join('');
-        reportDiv.innerHTML = `
-            <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:10px;">${d.name} 示意报告</div>
-            <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
-                <div style="background:white; padding:8px; border-radius:12px; text-align:center;"><div style="font-size:0.7rem;">F1提升</div><div style="font-size:1.2rem; font-weight:700; color:var(--accent-purple);">+${d.improvement.f1}%</div><div>${d.baseline.f1.toFixed(3)}→${d.final.f1.toFixed(3)}</div></div>
-                <div style="background:white; padding:8px; border-radius:12px; text-align:center;"><div style="font-size:0.7rem;">MSE降低</div><div style="font-size:1.2rem; font-weight:700; color:#28a745;">${Math.abs(d.improvement.mse)}%</div><div>${d.baseline.mse.toFixed(3)}→${d.final.mse.toFixed(3)}</div></div>
-            </div>
-            <div><strong>生成的特征规则（共${d.rules.length}条）：</strong></div>
-            <div style="margin-top:8px;">${rulesHtml}</div>
-            <div style="margin-top:8px;"><strong>决策树反馈的关键特征：</strong> ${d.top_features.join(' → ')}</div>
-            <div style="margin-top:6px; padding-top:6px; border-top:1px solid rgba(0,102,204,0.2); font-size:0.7rem;">✨ 动态三维诊断：F1 ${d.baseline.f1.toFixed(3)} → ${d.final.f1.toFixed(3)}，总提升 +${d.improvement.f1}%</div>
-        `;
+        const rulesHtml = d.rules.map(r => `<p><strong>${escapeSnapshot(r.desc)}</strong><br><code>${escapeSnapshot(r.formula)}</code></p>`).join('');
+        reportDiv.innerHTML = `<h4>${d.name} 独立测试报告快照</h4>
+            <p>Macro F1：${d.baseline.f1.toFixed(4)} → ${d.final.f1.toFixed(4)}（${d.improvement.f1 > 0 ? '+' : ''}${d.improvement.f1} 个百分点）</p>
+            <p>Log Loss：${d.baseline.log_loss.toFixed(4)} → ${d.final.log_loss.toFixed(4)}（越低越好）</p>
+            <p>已接受特征 ${d.rules.length} 个；5 轮 × 每轮 5 个候选。下方逐轮曲线使用验证集分数。</p>
+            ${rulesHtml}<p>弱交互 GPU XGBoost · reasoned · seed 42。网页模拟是另一次 Jungle 子集演示。</p>`;
         reportDiv.classList.add('active');
-        document.getElementById('console').innerHTML = `> 预置示意报告 - ${d.name}\n> F1: ${d.baseline.f1.toFixed(3)} → ${d.final.f1.toFixed(3)} (+${d.improvement.f1}%)\n> MSE: ${d.baseline.mse.toFixed(3)} → ${d.final.mse.toFixed(3)} (${d.improvement.mse}%)\n> 以上为预置示意数值。点击“运行表格模拟测试”查看内置样例的实际评估结果。`;
+        document.getElementById('console').textContent = `> 已完成训练快照：${d.name}\n> 测试 Macro F1：${d.baseline.f1.toFixed(4)} → ${d.final.f1.toFixed(4)}\n> 测试 Log Loss：${d.baseline.log_loss.toFixed(4)} → ${d.final.log_loss.toFixed(4)}\n> 详细日志、六项指标及消融见 tabular_data/outputs/latest_summary.md。\n> 点击“运行 Jungle 网页演示”可另外执行真实 GPU 模拟。`;
     }
 
     document.getElementById('chartLibrary').addEventListener('load', function() {

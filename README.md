@@ -11,7 +11,7 @@ Math：扩充数学 CoT 的中间推理步骤。流程是切分原始解答，�
 
 Code：现在支持两种模式。没有原始代码时，走“生成代码 -> 跑测试 -> 错误反馈 -> 修复”；有原始 code 和 reasoning 时，走队友的 rewrite 扩充流程，同步改写 reasoning 和 code，并做语义等价检查和质量评分。
 
-表格专用代码与数据集集中在 `tabular_data/`：主流程为 `tabular_data/tabular_octree.py`，特征生成逻辑为 `tabular_data/feature_generation.py`，样例数据为 `tabular_data/datasets/sample_tabular.csv`。表格上传文件和分析结果分别保存到该目录的 `uploads/`、`outputs/`，详见 [表格模块说明](tabular_data/README.md)。
+表格专用代码与数据集集中在 `tabular_data/`：主流程为 `tabular_data/tabular_octree.py`，特征生成逻辑为 `tabular_data/feature_proposals.py`，正式数据集为 `tabular_data/datasets/` 下的 Jungle Chess、Balance Scale、Chess KRK；网页样例来自 Jungle 训练集。表格上传文件和分析结果分别保存到该目录的 `uploads/`、`outputs/`，详见 [表格模块说明](tabular_data/README.md)。
 
 ## 安装依赖
 

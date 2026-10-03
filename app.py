@@ -153,7 +153,7 @@ def api_simulate():
     """用内置表格和本地特征规则执行真实模型评估，返回完整迭代记录。"""
     try:
         result = run_octree_analysis(llm_client=OfflineFeatureClient())
-        result["message"] = "内置 Wine 样例测试完成：特征由本地规则生成，指标来自交叉验证。"
+        result["message"] = "Jungle Chess 训练集样例测试完成：特征由本地规则生成，指标来自交叉验证。"
         return jsonify(safe_json(result))
     except Exception as exc:
         return jsonify({"success": False, "error": f"表格模拟失败：{type(exc).__name__}: {exc}"}), 500
