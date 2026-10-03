@@ -1,0 +1,6 @@
+feature,split_count,used_by_xgboost,gain,total_gain_fraction,primary_metric,importance_score,importance_std,single_column_importance_score,drop_retrain_score_drop,supported_predictive_contribution,dependency_group
+oct_composite_sum_11_r1,772.0,True,9.715532302856445,0.11121406684670315,f1_macro,0.16494892096698857,0.003958247820464087,0.10745506472507944,0.039852266653197854,True,oct_composite_sum_11_r1 | oct_piecewise_32_median_r4
+oct_composite_sum_28_r2,823.0,True,16.790550231933594,0.20489933597405907,f1_macro,0.1256585131959645,0.009153379950452838,0.1256585131959645,0.0077594719883787855,True,oct_composite_sum_28_r2
+oct_simple_product_17_r3,409.0,True,12.548913955688477,0.07610361128033387,f1_macro,0.04815408501079199,0.00963888757839696,0.04815408501079199,0.017967988678662006,True,oct_simple_product_17_r3
+oct_piecewise_32_median_r4,612.0,True,7.05051326751709,0.06398054897896095,f1_macro,0.07286051020970859,0.004411240873141671,0.07286051020970859,0.018673598136318803,True,oct_piecewise_32_median_r4
+__all_generated__,,,,,f1_macro,0.25902292087224776,0.002466725147767702,,0.06468900882448786,True,oct_composite_sum_11_r1 | oct_composite_sum_28_r2 | oct_simple_product_17_r3 | oct_piecewise_32_median_r4

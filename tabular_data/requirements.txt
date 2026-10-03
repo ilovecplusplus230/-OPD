@@ -1,0 +1,9 @@
+numpy
+pandas
+scipy
+scikit-learn
+openai
+python-dotenv
+# CUDA 12 wheel used by the retained GPU experiments.
+xgboost-cu12==3.4.1; sys_platform == "linux"
+xgboost==3.4.1; sys_platform != "linux"

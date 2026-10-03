@@ -1,0 +1,38 @@
+{
+  "source_url": "https://archive.ics.uci.edu/static/public/23/chess+king+rook+vs+king.zip",
+  "uci_archive_sha256": "39fc7ec218477c21d61032917d74ddb98d6fdbe3400fdaa6f514fad0b603712f",
+  "openml_arff_sha256": "2cb7f0d0af5493225b4b4769b7ea83065fa6f750c75d2f3af3f63c3cfb637ad2",
+  "coordinate_mapping": {
+    "a": 1,
+    "b": 2,
+    "c": 3,
+    "d": 4,
+    "e": 5,
+    "f": 6,
+    "g": 7,
+    "h": 8
+  },
+  "class_names": {
+    "1": "draw",
+    "10": "zero",
+    "18": "one",
+    "9": "two",
+    "7": "three",
+    "15": "four",
+    "14": "five",
+    "3": "six",
+    "2": "seven",
+    "11": "eight",
+    "17": "nine",
+    "5": "ten",
+    "12": "eleven",
+    "8": "twelve",
+    "6": "thirteen",
+    "16": "fourteen",
+    "13": "fifteen",
+    "4": "sixteen"
+  },
+  "verified_rows": 28056,
+  "coordinate_values_equal_all_rows": true,
+  "label_mapping_equal_all_rows": true
+}
