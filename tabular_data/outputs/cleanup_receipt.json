@@ -1,0 +1,12 @@
+{
+  "completed_at_utc": "2026-10-03T09:41:16.056210+00:00",
+  "kept_datasets": [
+    "jungle_chess",
+    "balance_scale",
+    "chess_krk"
+  ],
+  "removed_dataset_count": 11,
+  "removed_bytes": 79512736,
+  "preserved_files_verified": 72,
+  "scope": "Other dataset files, raw files, screening records and outputs removed; retained data and complete run directories unchanged."
+}

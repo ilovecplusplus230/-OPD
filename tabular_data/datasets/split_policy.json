@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "protocol": "holdout_20_40_40",
+  "seed": 42,
+  "ratios": {"train": 0.2, "validation": 0.4, "test": 0.4},
+  "roles": {"train": "拟合预处理、构造统计参数并训练 XGBoost", "validation": "评价候选并反馈下一轮，不参与拟合预处理", "test": "候选和模型冻结后的一次独立评估及消融，不反馈特征搜索"},
+  "stratify_column": "target",
+  "class_ratio_policy": "preserve_original",
+  "minimum_class_count_per_split": 5,
+  "maximum_rounding_error_in_samples": 2,
+  "note": "由人明确指定三份数据的职责及 20/40/40 比例，固定种子分层随机选取；每份均保留去重后原始类别比例。二次分层取整允许每类最多 2 条样本偏差，不进行正负 50/50 重采样。"
+}
